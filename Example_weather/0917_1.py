@@ -18,7 +18,7 @@ class MarkovChain_weather():
         self.probabilityMatrix = np.array([[0.4, 0.3, 0.3],
                                            [0.2, 0.6, 0.2],
                                            [0.1, 0.1, 0.8]])
-        self.frequency = 100000
+        self.frequency = 10000
         self.randomNum = 1000
         
         self.firstDayW = 'S'
@@ -66,7 +66,7 @@ if __name__ == '__main__' :
     print("START")
     test = MarkovChain_weather()
 #   
-    print (test.NextWeather('R'))
+#    print (test.NextWeather('R'))
     print(test.Predict(firstDayW='S', targetSeq = 'SRC'),'%')
     
     endTime = time.time()
