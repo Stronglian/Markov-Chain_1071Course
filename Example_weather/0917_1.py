@@ -23,6 +23,7 @@ class MarkovChain_weather():
         
         self.firstDayW = 'S'
 #        self.days = 3
+        return
     def NextWeather(self, todayW):
         #依照機率表(probabilityMatrix)與當天天氣(todayW)與猜測隔天天氣。
         assert todayW in self.tableW.keys()
