@@ -58,7 +58,7 @@ class MarkovChain_weather():
                 targetNum +=1
         print('The', targetSeq,'appeared',targetNum,'times in',self.frequency,'times.')
     
-        return round(targetNum*100 / self.frequency,2)
+        return round(targetNum*100 / self.frequency, 2)
 
 if __name__ == '__main__' :
     import time
@@ -70,4 +70,4 @@ if __name__ == '__main__' :
     print(test.Predict(firstDayW='S', targetSeq = 'SRC'),'%')
     
     endTime = time.time()
-    print('END', 'It takes', endTime-startTime ,'sec.')
+    print('END,', 'It takes', endTime-startTime ,'sec.')
