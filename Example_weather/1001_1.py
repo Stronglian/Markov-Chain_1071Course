@@ -3,6 +3,7 @@
 Created on Mon Oct  1 14:48:13 2018
 
 0: state 1, 1:state 2, 2:state 3
+
 """
 
 import numpy as np
@@ -13,7 +14,7 @@ class HidenMarkovModel():
         self.frequency = 10000
         self.randomNum = 10000
         
-        self.tableW = { '↑':0, '↓':1, '-':2}
+#        self.tableO = { '↑':0, '↓':1, '-':2}
         
         self.stateChangeMatrix = np.array([[0.6, 0.2, 0.2],
                                            [0.5, 0.3, 0.2],
@@ -21,11 +22,11 @@ class HidenMarkovModel():
         self.probabilityMatrix = np.array([[0.7, 0.1, 0.2],
                                            [0.1, 0.6, 0.3],
                                            [0.3, 0.3, 0.4]]) #[i][j] 在state i 時，生成j的機率
-        self.initialStateProb = np.array([0.5,0.2,0.3])
+        self.initialStateProb   = np.array([0.5, 0.2, 0.3])
         return
     def NextState(self, currectState = None, probState = None):
         #依照機率算下一個狀態
-        if currectState != None:#probState == None:# and 
+        if currectState != None:#probState == None:# and #分辨 initial
             probState = self.stateChangeMatrix[currectState]
         
         tempRan = random.randrange(0, self.randomNum)
@@ -59,7 +60,7 @@ class HidenMarkovModel():
             outputSeq += self.OutputAtState(currentState)
         return outputSeq
     def Predict(self, targetSeq = '↑↑↑↑↑', printTF = True):
-        #為目標序列(targetSeq)的機率
+        #計算為目標序列(targetSeq)的機率
         repeatTimes = len(targetSeq)
         #初始
 #        initialState = self.NextState(probState = self.initialStateProb)
@@ -75,7 +76,7 @@ class HidenMarkovModel():
     def CalMaxMin(self, times = 100):
         #跑 times 次，找最大最小機率
         minP, maxP = 1, 0
-        for i in range(100):
+        for i in range(times):
             num = test.Predict(printTF=False)
             if num > maxP:
                 maxP = num
