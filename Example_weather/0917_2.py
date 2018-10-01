@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Sep 17 16:57:03 2018
+weathe predict 
+start by Sun(s)
+2: record max and min
 """
 """
 assert:
@@ -67,7 +70,15 @@ if __name__ == '__main__' :
     test = MarkovChain_weather()
 #   
 #    print (test.NextWeather('R'))
-    print(test.Predict(firstDayW='S', targetSeq = 'SRC'),'%')
+    #print(test.Predict(firstDayW='S', targetSeq = 'SRC'),'%')
+    minP, maxP = 100, 0
+    for i in range(100):
+        num = test.Predict(firstDayW='S', targetSeq = 'SRC')
+        if num > maxP:
+            maxP = num
+        if num < minP:
+            minP = num
+    print(num,'%, max:',maxP,'%, min:', minP, '%')
     
     endTime = time.time()
     print('END,', 'It takes', endTime-startTime ,'sec.')
