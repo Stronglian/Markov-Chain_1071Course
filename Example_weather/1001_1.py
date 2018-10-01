@@ -89,7 +89,7 @@ if __name__ == '__main__' :
     print("START")
     test = HidenMarkovModel()
     
-    print(test.CalOneRound())
+    print(test.Predict())
 
     endTime = time.time()
     print('END,', 'It takes', endTime-startTime ,'sec.')
