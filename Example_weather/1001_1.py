@@ -62,8 +62,6 @@ class HidenMarkovModel():
     def Predict(self, targetSeq = '↑↑↑↑↑', printTF = True):
         #計算為目標序列(targetSeq)的機率
         repeatTimes = len(targetSeq)
-        #初始
-#        initialState = self.NextState(probState = self.initialStateProb)
         targetNum = 0
         for t in range(self.frequency):
             preO = self.CalOneRound(repeatTimes = repeatTimes)
