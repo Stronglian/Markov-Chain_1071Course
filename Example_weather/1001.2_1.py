@@ -8,6 +8,7 @@ Created on Mon Oct  1 14:48:13 2018
 """
 """
 先做了兩項相似函數的整合，但仍保留原有的名稱
+作業二 ，達成 targetSeq 的最佳路徑(state)為何?
 """
 
 import numpy as np
