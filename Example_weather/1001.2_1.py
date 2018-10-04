@@ -9,6 +9,8 @@ Created on Mon Oct  1 14:48:13 2018
 """
 先做了兩項相似函數的整合，但仍保留原有的名稱
 作業二 ，達成 targetSeq 的最佳路徑(state)為何?
+紀錄array：路徑、機率、結果
+找符合結果的最大機率，輸出路徑
 """
 
 import numpy as np
@@ -18,13 +20,14 @@ class HidenMarkovModel():
     def __init__(self):
         self.frequency = 10000
         self.randomNum = 10000
-        
+        # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
         self.stateChangeMatrix = np.array([[0.6, 0.2, 0.2],
                                            [0.5, 0.3, 0.2],
-                                           [0.4, 0.1, 0.5,]]) # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
+                                           [0.4, 0.1, 0.5,]]) 
+        #[i][j] 在state i 時，生成j的機率    
         self.probabilityMatrix = np.array([[0.7, 0.1, 0.2],
                                            [0.1, 0.6, 0.3],
-                                           [0.3, 0.3, 0.4]]) #[i][j] 在state i 時，生成j的機率
+                                           [0.3, 0.3, 0.4]]) 
         self.initialStateProb   = np.array([0.5, 0.2, 0.3])
         return
     def CalOutput(self, currectState = None, probM = None, output=[]):
@@ -80,7 +83,7 @@ class HidenMarkovModel():
         currentState = self.NextState(probState = self.initialStateProb)
         outputSeq += self.OutputAtState(currentState)
         #重複
-        for t in range(repeatTimes-1):#因為第一次已經跑了
+        for t in range(repeatTimes-1):#-1因為第一次已經跑了
             currentState = self.NextState(currectState = currentState)
             outputSeq += self.OutputAtState(currentState)
         return outputSeq
@@ -96,16 +99,18 @@ class HidenMarkovModel():
             print('The', targetSeq,'appeared',targetNum,'times in',self.frequency,'times.')
     
         return (float(targetNum)/ self.frequency)
-    def CalMaxMin(self, times = 100):
+    def CalMaxMin(self, times = 10):
         #跑 times 次，找最大最小機率
-        minP, maxP = 1, 0
+        minP, maxP, avgP = 1, 0, 0
         for i in range(times):
             num = test.Predict(printTF=False)
+            avgP += num
             if num > maxP:
                 maxP = num
             if num < minP:
                 minP = num
-        print('run',times,'times, max:',maxP,', min:', minP, )
+        avgP /= times
+        print('run',times,'times, max:',maxP,', min:', minP, ', avg:', avgP)
 
 if __name__ == '__main__' :
     import time
