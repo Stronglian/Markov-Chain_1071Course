@@ -88,7 +88,7 @@ if __name__ == '__main__' :
     print("START")
     test = HidenMarkovModel()
     
-    print(test.Predict())
+    print('->',test.Predict()*100,'%')
 
     endTime = time.time()
-    print('END,', 'It takes', endTime-startTime ,'sec.')
+    print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')

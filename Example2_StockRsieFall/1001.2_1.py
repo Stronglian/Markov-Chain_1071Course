@@ -103,7 +103,7 @@ class HidenMarkovModel():
         #跑 times 次，找最大最小機率
         minP, maxP, avgP = 1, 0, 0
         for i in range(times):
-            num = test.Predict(printTF=False)
+            num = test.Predict(printTF=True)
             avgP += num
             if num > maxP:
                 maxP = num
@@ -111,14 +111,14 @@ class HidenMarkovModel():
                 minP = num
         avgP /= times
         print('run',times,'times, max:',maxP,', min:', minP, ', avg:', avgP)
-
+        return
 if __name__ == '__main__' :
     import time
     startTime = time.time()
     print("START")
     test = HidenMarkovModel()
     
-    print(test.CalMaxMin())
+    test.CalMaxMin()
 
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')
