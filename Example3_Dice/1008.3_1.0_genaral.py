@@ -1,84 +1,54 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct  1 14:48:13 2018
+Created on Mon Oct  8 18:38:23 2018
 
-0: state 1, 1:state 2, 2:state 3
+@title: unfair dice
+"""
 
-嘗試做第二題 at slide P.22
-"""
-"""
-先做了兩項相似函數的整合，但仍保留原有的名稱
-作業二 ，達成 targetSeq 的最佳路徑(state)為何?(未進行)
-紀錄array：路徑、機率、結果
-找符合結果的最大機率，輸出路徑
-"""
 
 import numpy as np
 import random
 
-class HidenMarkovModel():
+class HidenMarkovModel_genaral():
     def __init__(self):
-        self.frequency = 10000
+        self.frequency = 100000
         self.randomNum = 10000
         # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
-        self.stateChangeMatrix = np.array([[0.6, 0.2, 0.2],
-                                           [0.5, 0.3, 0.2],
-                                           [0.4, 0.1, 0.5,]]) 
+        self.stateChangeMatrix = np.array([[0.95, 0.05],
+                                           [0.10, 0.90]]) 
         #[i][j] 在state i 時，生成j的機率    
-        self.probabilityMatrix = np.array([[0.7, 0.1, 0.2],
-                                           [0.1, 0.6, 0.3],
-                                           [0.3, 0.3, 0.4]]) 
-        self.initialStateProb   = np.array([0.5, 0.2, 0.3])
+        self.probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
+                                           [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair 
+        self.initialStateProb   = np.array([0.6, 0.4]) #[fair, unfair]
+        self.stateOutput = [str(i) for i in range(1, 6+1)]
         return
     def CalOutput(self, currectState = None, probM = None, output=[]):
         """ 算機率的共用函數"""
-#        assert len(probM) == len(output)
+#        assert len(probM) == len(output) #確認輸入正確
         if not len(probM) == len(output):
             print(currectState, probM, output)
             raise AssertionError
-        
         tempRan = random.randrange(0, self.randomNum)
         for i in range(len(output)):
             if tempRan < self.randomNum*probM[:i+1].sum(): #總和到i項
                 return output[i]
                 break #多的
-#        return output[-1]
     def NextState(self, currectState = None, probState = None):
-        """依照機率算下一個狀態"""
+        """依照機率算下一個狀態(使用的骰子)"""
         #分辨 initial
         if currectState != None:#probState == None:# and 
             probState = self.stateChangeMatrix[currectState]
         
         return self.CalOutput(currectState = currectState, 
                          probM = probState, 
-                         output=[0, 1, 2])
-        #====
-#        
-#        tempRan = random.randrange(0, self.randomNum)
-#        if tempRan < self.randomNum*probState[0]:
-#            return 0
-#        elif tempRan < self.randomNum*(probState[0]+probState[1]):
-#            return 1
-#        else:
-#            return 2
+                         output=[i for i in range(len(probState))]) #可共用
     def OutputAtState(self, currectState):
         """依照機率與現有狀態得出現機率"""
         return self.CalOutput(currectState = currectState, 
                          probM = self.probabilityMatrix[currectState], 
-                         output=['↑','↓','-'])
-        #====
-#        probO = self.probabilityMatrix[currectState]
-#        
-#        tempRan = random.randrange(0, self.randomNum)
-#        if tempRan < self.randomNum*probO[0]:
-#            return '↑'
-#        elif tempRan < self.randomNum*(probO[0]+probO[1]):
-#            return '↓'
-#        else:
-#            return '-'
-        
+                         output= self.stateOutput)
     def CalOneRound(self, repeatTimes=5):
-        """"""
+        """執行一次的內容"""
         outputSeq = ''
         #初始
         currentState = self.NextState(probState = self.initialStateProb)
@@ -87,12 +57,13 @@ class HidenMarkovModel():
         for t in range(repeatTimes-1):#-1因為第一次已經跑了
             currentState = self.NextState(currectState = currentState)
             outputSeq += self.OutputAtState(currentState)
-        return outputSeq
+        return outputSeq   
     def Predict(self, targetSeq, printTF = True):
         """計算為目標序列(targetSeq)的機率"""
         repeatTimes = len(targetSeq)
         targetNum = 0
         for t in range(self.frequency):
+            print('\b'*6, round(t*100.0/self.frequency,2),'%', flush = True, end='')
             preO = self.CalOneRound(repeatTimes = repeatTimes)
             if preO == targetSeq:
                 targetNum +=1
@@ -100,27 +71,14 @@ class HidenMarkovModel():
             print('The', targetSeq,'appeared',targetNum,'times in',self.frequency,'times.')
     
         return (float(targetNum)/ self.frequency)
-    def CalMaxMin(self, targetSeq, times = 10, printTF=False):
-        #跑 times 次，找最大最小機率
-        minP, maxP, avgP = 1, 0, 0
-        for i in range(times):
-            num = test.Predict(targetSeq = targetSeq, printTF=printTF)
-            avgP += num
-            if num > maxP:
-                maxP = num
-            if num < minP:
-                minP = num
-        avgP /= times
-        print('run',times,'times, max:',maxP,', min:', minP, ', avg:', avgP)
-        return
 if __name__ == '__main__' :
     import time
     startTime = time.time()
     print("START")
-    test = HidenMarkovModel()
+    test = HidenMarkovModel_genaral()
     
-#    print("Probability is", test.Predict(targetSeq="↑↑↑↑↑"))
-    test.CalMaxMin(targetSeq = '↑↑↑↑↑', printTF=True)
+    print("Probability is", test.Predict(targetSeq = '123456'))
+    
 
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')
