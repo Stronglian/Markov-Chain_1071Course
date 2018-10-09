@@ -10,7 +10,7 @@ Created on Wed Oct 10 00:04:28 2018
     
 """
 import numpy as np
-import random
+#import random
 
 class HidenMarkovModel_foward():
     def __init__(self):
@@ -21,7 +21,7 @@ class HidenMarkovModel_foward():
         #[i][j] 在state i 時，生成j的機率    
         self.probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
                                            [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair 
-        self.stateOutput = np.array([str(i) for i in range(1, len(self.probabilityMatrix[0,:])+1)]) #為何會變成 range(1,6)
+        self.stateOutput = np.array([str(i) for i in range(1, len(self.probabilityMatrix[0,:])+1)]) 
 #        self.stateOutput = np.array([str(i) for i in range(1, 6+1)])
         #驗證資料正確性
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix)) \
@@ -33,14 +33,17 @@ class HidenMarkovModel_foward():
             raise AssertionError
         self.stateNumber = len(self.initialStateProb)
         return
+    
     def a_prob(self, preState, nextState):
         """(未使用)從 preState 換到 nextState 的機率"""
         prob = self.stateChangeMatrix[preState, nextState]
         return prob
+    
     def b_prob(self, state, output):
         """從 state 生出 output 的機率"""
         prob = self.probabilityMatrix[state, self.stateOutput == output]
         return prob
+    
     def CalAlphaTable(self, target):
         """ alpha 指定生成數列、時間t時，在 state j 的機率"""
 #        stateNumber = len(self.initialStateProb)
@@ -60,12 +63,13 @@ class HidenMarkovModel_foward():
     #            print(tempSum)
                 alpha[t, j] = tempSum * self.b_prob(j, target[t])
         return alpha
+    
     def PredictUseAlpha(self, target):
-        """ 將最後兩組相加，便是所求"""
+        """ 將Alpha最後兩組相加，便是所求"""
         alpha = self.CalAlphaTable(target)
-        
         print('"',target,'"',"'s Probability:",alpha[-1,:].sum(dtype = np.float32))
         return
+    
 if __name__ == '__main__' :
     import time
     startTime = time.time()
@@ -73,29 +77,7 @@ if __name__ == '__main__' :
     
     test = HidenMarkovModel_foward()
     test.PredictUseAlpha(target = "123456")
-#    target = "123456"
-#    stateNumber = len(test.initialStateProb)
-#    #alpha - time(-1) - state
-#    alpha = np.zeros((len(target), stateNumber), dtype = np.float32)
-#    
-#    #初始
-#    for j, pi in enumerate(test.initialStateProb):
-#        alpha[0, j] = pi * test.b_prob(j, target[0])
-##    print(alpha)
-#    #剩下字串
-#    for t in range(1, len(target)):
-#        
-#        for j in range(stateNumber):
-##            for s in range(stateNumber):
-##                print('t',t,'s',s)
-##                print (alpha[t-1,s], '***',test.a_prob(s, j))
-##            tempSum = sum([ alpha[t-1,s]*test.a_prob(s, j)  for s in range(stateNumber)])
-#            tempSum = np.multiply(alpha[t-1,:], test.stateChangeMatrix[:, j]).sum(dtype = np.float32)
-##            print(tempSum)
-#            alpha[t, j] = tempSum * test.b_prob(j, target[t])
-#    #答案輸出
-#    print(alpha[-1,:].sum(dtype = np.float32))
-#    
-#    endTime = time.time()
-#    print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
+    
+    endTime = time.time()
+    print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
 
