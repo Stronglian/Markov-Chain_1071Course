@@ -11,7 +11,7 @@ import random
 
 class HidenMarkovModel_genaral():
     def __init__(self):
-        self.frequency = 100000
+        self.frequency = 1000000
         self.randomNum = 10000
         # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
         self.stateChangeMatrix = np.array([[0.95, 0.05],
@@ -63,7 +63,7 @@ class HidenMarkovModel_genaral():
         repeatTimes = len(targetSeq)
         targetNum = 0
         for t in range(self.frequency):
-            print('\b'*6, round(t*100.0/self.frequency,2),'%', flush = True, end='')
+            print('\r', t*100.0/self.frequency,'%')#, flush = True, end='')
             preO = self.CalOneRound(repeatTimes = repeatTimes)
             if preO == targetSeq:
                 targetNum +=1
@@ -78,7 +78,6 @@ if __name__ == '__main__' :
     test = HidenMarkovModel_genaral()
     
     print("Probability is", test.Predict(targetSeq = '123456'))
-    
 
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')
