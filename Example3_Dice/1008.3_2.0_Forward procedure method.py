@@ -7,11 +7,11 @@ Created on Wed Oct 10 00:04:28 2018
 """
 待處理:
     輸出與 array index 的對應問題
-    
+    矩陣運算
 """
 import numpy as np
 #import random
-
+np.set_printoptions(suppress=True)
 class HidenMarkovModel_foward():
     def __init__(self):
         self.initialStateProb   = np.array([0.6, 0.4]) #[fair, unfair]
@@ -40,33 +40,41 @@ class HidenMarkovModel_foward():
         return prob
     
     def b_prob(self, state, output):
-        """從 state 生出 output 的機率"""
+        """(可以簡化進而不使用)從 state 生出 output 的機率"""
         prob = self.probabilityMatrix[state, self.stateOutput == output]
         return prob
     
     def CalAlphaTable(self, target):
         """ alpha 指定生成數列、時間t時，在 state j 的機率"""
-#        stateNumber = len(self.initialStateProb)
         #alpha - time(-1) - state
         alpha = np.zeros((len(target), self.stateNumber), dtype = np.float32)
         
         #初始 t = 0，生成第一個target的機率
-        for j, pi in enumerate(self.initialStateProb):
-            alpha[0, j] = pi * self.b_prob(j, target[0])
-    #    print(alpha)
+#        for j, pi in enumerate(self.initialStateProb):
+#            alpha[0, j] = pi * self.b_prob(j, target[0])
+        alpha[0, :] = self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
+#        alpha[0, :] = np.multiply(self.initialStateProb , self.probabilityMatrix[:, self.stateOutput == target[0]].T)
+        
         #剩下的字串
         for t in range(1, len(target)):
-            
+            #合運算 - 1
             for j in range(self.stateNumber):
-    #            tempSum = sum([ alpha[t-1,s]*self.a_prob(s, j)  for s in range(self.stateNumber)])
+#                tempSum = sum([ alpha[t-1,s]*self.a_prob(s, j)  for s in range(self.stateNumber)])
                 tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix[:, j]).sum(dtype = np.float32)
-    #            print(tempSum)
-                alpha[t, j] = tempSum * self.b_prob(j, target[t])
+                #print(tempSum, end = '')
+                #print(tempSum)
+                alpha[t, j] = tempSum * self.probabilityMatrix[j, self.stateOutput == target[t]]#self.b_prob(j, target[t])
+            #print()
+#            #合運算 - 2
+#            tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix[:,:].T).sum(axis = 1, dtype = np.float32)
+#            print(tempSum)
+#            alpha[t, :] = np.multiply(tempSum, self.probabilityMatrix[:, self.stateOutput == target[t]].T)#self.b_prob(j, target[t])
         return alpha
     
     def PredictUseAlpha(self, target):
         """ 將Alpha最後兩組相加，便是所求"""
         alpha = self.CalAlphaTable(target)
+        print('alphaTable:\n',alpha)
         print('"',target,'"',"'s Probability:",alpha[-1,:].sum(dtype = np.float32))
         return
     
