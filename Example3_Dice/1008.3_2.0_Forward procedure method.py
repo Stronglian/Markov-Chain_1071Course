@@ -67,7 +67,7 @@ class HidenMarkovModel_foward():
 #                tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix[:, j]).sum(dtype = np.float32)
 #                #print(tempSum, end = '')
 #                #print(tempSum)
-#                alpha[t, j] = tempSum * self.probabilityMatrix[j, self.stateOutput == target[t]]#self.b_prob(j, target[t])
+#                alpha[t, j] = tempSum * self.probabilityMatrix[j, self.stateOutput == target[t]] #self.b_prob(j, target[t])
 #            #print()
             #合運算 - 2
             tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix.T).sum(axis = 1, dtype = np.float32)
