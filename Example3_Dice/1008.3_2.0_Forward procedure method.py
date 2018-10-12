@@ -33,19 +33,23 @@ class HidenMarkovModel_foward():
             raise AssertionError
         self.stateNumber = len(self.initialStateProb)
         return
-    
-    def a_prob(self, preState, nextState):
-        """(未使用)從 preState 換到 nextState 的機率"""
-        prob = self.stateChangeMatrix[preState, nextState]
-        return prob
-    
-    def b_prob(self, state, output):
-        """(可以簡化進而不使用)從 state 生出 output 的機率"""
-        prob = self.probabilityMatrix[state, self.stateOutput == output]
-        return prob
-    
+
+#    def a_prob(self, preState, nextState):
+#        """(未使用)從 preState 換到 nextState 的機率"""
+#        prob = self.stateChangeMatrix[preState, nextState]
+#        return prob
+#    
+#    def b_prob(self, state, output):
+#        """(可以簡化進而不使用)從 state 生出 output 的機率"""
+#        prob = self.probabilityMatrix[state, self.stateOutput == output]
+#        return prob
+#
     def CalAlphaTable(self, target):
-        """ alpha 指定生成數列、時間t時，在 state j 的機率"""
+        """ alpha 指定生成數列、時間t時，在 state j 的機率
+        alpha: (指定輸出下，)第t次，輸出指定序列之機率。
+        a: 狀態轉換機率；self.stateChangeMatrix[preState, nextState]
+        b: 該狀態輸出該物機率；self.probabilityMatrix[state, self.stateOutput == output]
+        """
         #alpha - time(-1) - state
         alpha = np.zeros((len(target), self.stateNumber), dtype = np.float32)
         
@@ -58,17 +62,17 @@ class HidenMarkovModel_foward():
         #剩下的字串
         for t in range(1, len(target)):
             #合運算 - 1
-            for j in range(self.stateNumber):
-#                tempSum = sum([ alpha[t-1,s]*self.a_prob(s, j)  for s in range(self.stateNumber)])
-                tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix[:, j]).sum(dtype = np.float32)
-                #print(tempSum, end = '')
-                #print(tempSum)
-                alpha[t, j] = tempSum * self.probabilityMatrix[j, self.stateOutput == target[t]]#self.b_prob(j, target[t])
-            #print()
-#            #合運算 - 2
-#            tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix[:,:].T).sum(axis = 1, dtype = np.float32)
-#            print(tempSum)
-#            alpha[t, :] = np.multiply(tempSum, self.probabilityMatrix[:, self.stateOutput == target[t]].T)#self.b_prob(j, target[t])
+#            for j in range(self.stateNumber):
+##                tempSum = sum([ alpha[t-1,s]*self.a_prob(s, j)  for s in range(self.stateNumber)])
+#                tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix[:, j]).sum(dtype = np.float32)
+#                #print(tempSum, end = '')
+#                #print(tempSum)
+#                alpha[t, j] = tempSum * self.probabilityMatrix[j, self.stateOutput == target[t]]#self.b_prob(j, target[t])
+#            #print()
+            #合運算 - 2
+            tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix.T).sum(axis = 1, dtype = np.float32)
+            #print(tempSum)
+            alpha[t, :] = np.multiply(tempSum, self.probabilityMatrix[:, self.stateOutput == target[t]].T)#self.b_prob(j, target[t])
         return alpha
     
     def PredictUseAlpha(self, target):
