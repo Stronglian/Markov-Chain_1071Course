@@ -55,19 +55,17 @@ class HidenMarkovModel_backward():
         beta = np.zeros((len(target), self.stateNumber), dtype = np.float32)
         #初始 t = T
         beta[-1, :] = np.ones(len(beta[-1, :]))
-        print(beta[-1,:])
+#        print(beta[-1,:])
         #剩下的字串
         for t in range(len(target)-1, 0, -1): #(t-1) to t
-            print('t=',t+1, '===')
+#            print('t=',t+1, '===')
             for s in range(self.stateNumber):
-                print('t=',t+1, 's=',s)
+#                print('t=',t+1, 's=',s)
                 a_prob = self.stateChangeMatrix[s, :]
                 b_prob = self.probabilityMatrix[:, self.stateOutput == target[t]].T[0]
-                print('a_prob',a_prob,'\nb_prob', b_prob,'\nbeta['+str(t)+','+str(s)+']',beta[t, :])
+#                print('a_prob',a_prob,'\nb_prob', b_prob,'\nbeta['+str(t)+','+str(s)+']',beta[t, :])
                 beta[t-1, s] = np.multiply(np.multiply( a_prob, b_prob), beta[t, :]).sum()
-            print('beta['+str(t-1)+', :]', beta[t-1, :], '\n\n\n')
-            
-            print(beta[t, :])
+#            print('beta['+str(t-1)+', :]', beta[t-1, :], '\n\n\n')
 #            assert True == False
         #收尾 t = 0，生成第一個target的機率
         beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
