@@ -42,7 +42,7 @@ class HidenMarkovModel_gamma():
 #        return prob
 #
     def CalAlphaTable(self, target):
-        """ alpha 指定生成數列、時間t時，在 state j 的機率
+        """ alpha 指定生成數列、時間t時，在 state j 的機率 #前綴
         alpha: (指定輸出下，)第t次，輸出指定序列之機率。
         a: 狀態轉換機率；self.stateChangeMatrix[preState, nextState]
         b: 該狀態輸出該物機率；self.probabilityMatrix[state, self.stateOutput == output]
@@ -56,19 +56,20 @@ class HidenMarkovModel_gamma():
             tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix.T).sum(axis = 1, dtype = np.float32)
             #print(tempSum)
             alpha[t, :] = np.multiply(tempSum, self.probabilityMatrix[:, self.stateOutput == target[t]].T)#self.b_prob(j, target[t])
+        #另外轉存
+        self.alphaTable = alpha
         return alpha
     
     def PredictUseAlpha(self, target):
-        """ 將Alpha最後兩組相加，便是所求"""
+        """ 將 Alpha 最後兩組相加，便是所求"""
         alpha = self.CalAlphaTable(target)
         print('alphaTable:\n',alpha)
         print('"',target,'"',"'s Probability:",alpha[-1,:].sum(dtype = np.float32))
         return
     
     def CalBetaTable(self, target):
-        """ beta 指定生成數列、時間t時，在 state j 的機率
-        alpha: (指定輸出下，)第t次，輸出指定序列之機率。
-        beta: 
+        """ beta 指定生成數列、時間t時，在 state j 的機率 #後綴
+        beta: (指定輸出下，)第t次之後，輸出指定序列之機率。
         a: 狀態轉換機率；self.stateChangeMatrix[preState, nextState]
         b: 該狀態輸出該物機率；self.probabilityMatrix[state, self.stateOutput == output]
         """
@@ -90,10 +91,12 @@ class HidenMarkovModel_gamma():
 #            assert True == False
         #收尾 t = 0，生成第一個target的機率
         beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
+        #另外轉存
+        self.betaTable = beta
         return beta
     
     def PredictUseBeta(self, target):
-        """ 將Beta最後兩組相加，便是所求"""
+        """ 將 Beta 最前兩組相加，便是所求"""
         beta = self.CalBetaTable(target)
         print('betaTable:\n',beta)
         print('"',target,'"',"'s Probability:",beta[0,:].sum(dtype = np.float32))
@@ -108,14 +111,18 @@ class HidenMarkovModel_gamma():
         #gamma - time(-1) - state
         gamma = np.zeros((len(target), self.stateNumber), dtype = np.float32)
         gamma = (alpha * beta) / prob_PrO
+        #另外轉存
+        self.gammaTable = gamma
         return gamma
     
     def Predict_optimalStateSequence_useGamma(self, target):
         """ """
         gamma = self.CalGammaTable(target)
         seqLis = []
-        for t in range(len(target)):
-            indexTmp = gamma[t, :].argmax()
+#        for t in range(len(target)):
+#            indexTmp = gamma[t, :].argmax()
+#            seqLis.append(self.stateName[indexTmp])
+        for indexTmp in gamma.argmax(axis = 1):
             seqLis.append(self.stateName[indexTmp])
         print('"',target,'"',"'s Optimal State Sequence is", seqLis)
         return
@@ -127,6 +134,7 @@ if __name__ == '__main__' :
     
     test = HidenMarkovModel_gamma()
     test.Predict_optimalStateSequence_useGamma(target = "123456")
+    alpha, beta, gamma = test.alphaTable, test.betaTable, test.gammaTable
     
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
