@@ -102,7 +102,7 @@ class HidenMarkovModel_gamma():
         return
     
     def CalGammaTable(self, target):
-        """ """
+        """ 利用 alpha、beta 來算該 state 發生機率，進而推導最佳 State 順序"""
         alpha = self.CalAlphaTable(target)
         beta = self.CalBetaTable(target)
         prob_PrO = beta[0,:].sum(dtype = np.float32) #alpha[-1,:].sum(dtype = np.float32)
