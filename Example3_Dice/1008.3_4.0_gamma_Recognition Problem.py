@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct 15 15:12:47 2018
-"""import numpy as np
+"""
+import numpy as np
 #import random
 np.set_printoptions(suppress=True)
 class HidenMarkovModel_gamma():
