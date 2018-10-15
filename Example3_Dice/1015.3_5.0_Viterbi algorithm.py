@@ -31,6 +31,7 @@ class HidenMarkovModel_Viterbi():
         return
     def CalRoPsiTable(self, target):
         """ """
+        T = len(target)
         #step 0 - table #table - time(-1) - state #ρ (ro)、ψ(psi)
         ro  = np.zeros((len(target), self.stateNumber), dtype = np.float32)
         psi = np.zeros((len(target), self.stateNumber), dtype = np.float32)
@@ -45,19 +46,24 @@ class HidenMarkovModel_Viterbi():
                 psi[t, s] = (ro[t-1, s] * self.stateChangeMatrix[:, s]).argmax() #*  \
 #                            self.probabilityMatrix[s, self.stateOutput == target[t]] #不用算入，因為乘了相對大小還是不變
         #Step 3 – Termination
-        P_all  = ro[:,:].max(axis = 1)    #P*
-        iT_all = ro[:,:].argmax(axis = 1) #i*
+#        P_all  = ro[:,:].max(axis = 1)    #P*
+#        iT_all = ro[:,:].argmax(axis = 1) #i*
+        P_all  = ro[-1,:].max()    #P*
+        iT_all = ro[-1,:].argmax() #i*
 #        print(P_all, iT_all)
         #Step 4 – Path (state sequence) backtracking
-        for t in range(len(iT_all)-1, 0, -1):        
+        stateSeqIndex = np.array([-1 for i in range(T)])
+        stateSeqIndex[-1] = iT_all
+        for t in range(len(target)-1, 0, -1):
 #        for t, index in list(enumerate(reversed(iT_all)))[1:]:
-            iT_all[t-1] = psi[t, iT_all[t]]
+#            print(stateSeqIndex[t])
+            stateSeqIndex[t-1] = psi[t, stateSeqIndex[t]]
 #            iT_all[t-1] = psi[t, index]
 #        assert True == False
         #另外轉存
         self.roTable = ro
         self.psiTable = psi
-        return ro, psi, P_all[-1], iT_all
+        return ro, psi, P_all, stateSeqIndex
     def Predict_optimalStateSequence_useRoPsi(self,target):
         """ """
         ro, psi, bestProb, bestStateSquenceIndex = self.CalRoPsiTable(target)
