@@ -10,6 +10,7 @@ class HidenMarkovModel_gamma():
         
         self.initialStateProb   = np.array([0.6, 0.4]) #[fair, unfair]
         self.stateName = ['fair', 'unfair']
+        self.stateNumber = len(self.initialStateProb)
         # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
         self.stateChangeMatrix = np.array([[0.95, 0.05],
                                            [0.10, 0.90]]) 
@@ -19,13 +20,13 @@ class HidenMarkovModel_gamma():
         self.stateOutput = np.array([str(i) for i in range(1, len(self.probabilityMatrix[0,:])+1)])
         #驗證資料正確性
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix)) \
-            or (not len(self.initialStateProb) == len(self.probabilityMatrix)):
+            or (not len(self.initialStateProb) == len(self.probabilityMatrix)) \
+            or (not len(self.initialStateProb) == len(self.stateName)):
             print("State 數量未對上")
             raise AssertionError
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix[:,0])): 
             print("輸出 數量未對上")
             raise AssertionError
-        self.stateNumber = len(self.initialStateProb)
         return
 
 #    def a_prob(self, preState, nextState):
