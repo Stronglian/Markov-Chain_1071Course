@@ -7,7 +7,7 @@ import numpy as np
 np.set_printoptions(suppress=True)
 class HidenMarkovModel_gamma():
     def __init__(self):
-        
+        #state
         self.initialStateProb   = np.array([0.6, 0.4]) #[fair, unfair]
         self.stateName = ['fair', 'unfair']
         self.stateNumber = len(self.initialStateProb)
@@ -17,6 +17,7 @@ class HidenMarkovModel_gamma():
         #[i][j] 在state i 時，生成j的機率    
         self.probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
                                            [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair 
+        #output
         self.stateOutput = np.array([str(i) for i in range(1, len(self.probabilityMatrix[0,:])+1)])
         #驗證資料正確性
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix)) \
