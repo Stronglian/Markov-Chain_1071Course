@@ -19,8 +19,7 @@ class HidenMarkovModel_gamma():
         #[i][j] 在state i 時，生成j的機率    
         self.probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
                                            [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair 
-        self.stateOutput = np.array([str(i) for i in range(1, len(self.probabilityMatrix[0,:])+1)]) 
-#        self.stateOutput = np.array([str(i) for i in range(1, 6+1)])
+        self.stateOutput = np.array([str(i) for i in range(1, len(self.probabilityMatrix[0,:])+1)])
         #驗證資料正確性
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix)) \
             or (not len(self.initialStateProb) == len(self.probabilityMatrix)):
