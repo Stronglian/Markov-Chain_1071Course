@@ -11,7 +11,7 @@ import random
 
 class HidenMarkovModel_genaral():
     def __init__(self):
-        self.frequency = 100000
+        self.frequency = 1000000
         self.randomNum = 10000
         self.initialStateProb   = np.array([0.6, 0.4]) #[fair, unfair]
         # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
