@@ -60,7 +60,7 @@ class HidenMarkovModel_gamma():
         self.alphaTable = alpha
         return alpha
     
-    def PredictUseAlpha(self, target ,boolPrint = True):
+    def PredictUseAlpha(self, target, boolPrint = True):
         """ 將 Alpha 最後兩組相加，便是所求"""
         alpha = self.CalAlphaTable(target)
         prob_ProO_alpha = alpha[-1,:].sum(dtype = np.float32)
@@ -130,11 +130,14 @@ class HidenMarkovModel_gamma():
         """ """
         gamma = self.CalGammaTable(target)
         seqLis = []
+        probOfOptimalSeq = 1
 #        for t in range(len(target)):
 #            indexTmp = gamma[t, :].argmax()
 #            seqLis.append(self.stateName[indexTmp])
-        for indexTmp in gamma.argmax(axis = 1):
+        for i, indexTmp in enumerate(gamma.argmax(axis = 1)):
+            probOfOptimalSeq *= gamma[i][indexTmp]
             seqLis.append(self.stateName[indexTmp])
+        print('"',target,'"',"'s Optimal State Sequence's Probability:", probOfOptimalSeq)
         print('"',target,'"',"'s Optimal State Sequence is", seqLis)
         return
     
@@ -144,7 +147,7 @@ if __name__ == '__main__' :
     print("START\n\n")
     
     test = HidenMarkovModel_gamma()
-    test.Predict_optimalStateSequence_useGamma(target = "111666")
+    test.Predict_optimalStateSequence_useGamma(target = "123456")
     alpha, beta, gamma = test.alphaTable, test.betaTable, test.gammaTable
     
     endTime = time.time()
