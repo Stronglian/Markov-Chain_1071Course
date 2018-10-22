@@ -8,6 +8,7 @@ Created on Wed Oct 10 00:04:28 2018
 待處理:
     輸出與 array index 的對應問題
     矩陣運算
+- 到底 initial 要成在哪?
 """
 import numpy as np
 #import random
@@ -67,15 +68,18 @@ class HidenMarkovModel_backward():
                 beta[t-1, s] = np.multiply(np.multiply( a_prob, b_prob), beta[t, :]).sum()
 #            print('beta['+str(t-1)+', :]', beta[t-1, :], '\n\n\n')
 #            assert True == False
-        #收尾 t = 0，生成第一個target的機率
-        beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
+        #收尾 t = 0，生成第一個target的機率 #流到要算機率在處理
+#        beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
+#        beta[0, :] = beta[0, :] 
         return beta
     
     def PredictUseBeta(self, target):
         """ 將Beta最後兩組相加，便是所求"""
         beta = self.CalBetaTable(target)
         print('betaTable:\n',beta)
-        print('"',target,'"',"'s Probability:",beta[0,:].sum(dtype = np.float32))
+#        print('"',target,'"',"'s Probability:", beta[0,:].sum(dtype = np.float32))
+#        print('"',target,'"',"'s Probability:", (self.initialStateProb * beta[0,:]).sum(dtype = np.float32))
+        print('"',target,'"',"'s Probability:", (beta[0,:] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T).sum(dtype = np.float32))
         return
     
 if __name__ == '__main__' :

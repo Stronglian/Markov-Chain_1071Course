@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Oct 15 15:12:47 2018
+
+111666 怪怪的
+
 """
 import numpy as np
 #import random
@@ -23,11 +26,9 @@ class HidenMarkovModel_gamma():
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix)) \
             or (not len(self.initialStateProb) == len(self.probabilityMatrix)) \
             or (not len(self.initialStateProb) == len(self.stateName)):
-            print("State 數量未對上")
-            raise AssertionError
+            raise AssertionError("State 數量未對上")
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix[:,0])): 
-            print("輸出 數量未對上")
-            raise AssertionError
+            raise AssertionError("輸出 數量未對上")
         return
 
 #    def a_prob(self, preState, nextState):
@@ -59,12 +60,14 @@ class HidenMarkovModel_gamma():
         self.alphaTable = alpha
         return alpha
     
-    def PredictUseAlpha(self, target):
+    def PredictUseAlpha(self, target ,boolPrint = True):
         """ 將 Alpha 最後兩組相加，便是所求"""
         alpha = self.CalAlphaTable(target)
-        print('alphaTable:\n',alpha)
-        print('"',target,'"',"'s Probability:",alpha[-1,:].sum(dtype = np.float32))
-        return
+        prob_ProO_alpha = alpha[-1,:].sum(dtype = np.float32)
+        if boolPrint:
+            print('alphaTable:\n',alpha)
+            print('"',target,'"',"'s Probability:", prob_ProO_alpha)
+        return prob_ProO_alpha
     
     def CalBetaTable(self, target):
         """ beta 指定生成數列、時間t時，在 state j 的機率 #後綴
@@ -89,24 +92,33 @@ class HidenMarkovModel_gamma():
 #            print('beta['+str(t-1)+', :]', beta[t-1, :], '\n\n\n')
 #            assert True == False
         #收尾 t = 0，生成第一個target的機率
-        beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
+#        beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
+#        beta[0, :] = beta[0, :] 
         #另外轉存
         self.betaTable = beta
         return beta
     
-    def PredictUseBeta(self, target):
+    def PredictUseBeta(self, target, boolPrint=True):
         """ 將 Beta 最前兩組相加，便是所求"""
         beta = self.CalBetaTable(target)
-        print('betaTable:\n',beta)
-        print('"',target,'"',"'s Probability:",beta[0,:].sum(dtype = np.float32))
-        return
+        prob_PrO_bata = (beta[0,:] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T).sum(dtype = np.float32)
+        if boolPrint:
+            print('betaTable:\n',beta)
+            print('"',target,'"',"'s Probability:", prob_PrO_bata)
+        return prob_PrO_bata
     
     def CalGammaTable(self, target):
         """ 利用 alpha、beta 來算該 state 發生機率，進而推導最佳 State 順序"""
-        alpha = self.CalAlphaTable(target)
-        beta = self.CalBetaTable(target)
-        prob_PrO = beta[0,:].sum(dtype = np.float32) #alpha[-1,:].sum(dtype = np.float32)
-        assert prob_PrO == alpha[-1,:].sum(dtype = np.float32)
+#        alpha = self.CalAlphaTable(target)
+#        beta = self.CalBetaTable(target)
+        prob_PrO = self.PredictUseAlpha(target, boolPrint=False)
+        prob_PrO_beta = self.PredictUseBeta(target, boolPrint=False)
+        alpha = self.alphaTable
+        beta = self.betaTable
+#        prob_PrO = beta[0,:].sum(dtype = np.float32) #alpha[-1,:].sum(dtype = np.float32)
+        if not prob_PrO == prob_PrO_beta:
+#            raise AssertionError("alpha(",prob_PrO,"),beta(",prob_PrO_beta,")結果不同")
+            print("alpha(",prob_PrO,"),beta(",prob_PrO_beta,")結果不同")
         #gamma - time(-1) - state
         gamma = np.zeros((len(target), self.stateNumber), dtype = np.float32)
         gamma = (alpha * beta) / prob_PrO
@@ -132,7 +144,7 @@ if __name__ == '__main__' :
     print("START\n\n")
     
     test = HidenMarkovModel_gamma()
-    test.Predict_optimalStateSequence_useGamma(target = "123456")
+    test.Predict_optimalStateSequence_useGamma(target = "111666")
     alpha, beta, gamma = test.alphaTable, test.betaTable, test.gammaTable
     
     endTime = time.time()

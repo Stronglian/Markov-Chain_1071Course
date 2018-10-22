@@ -79,7 +79,7 @@ class HidenMarkovModel_foward():
         """ 將Alpha最後兩組相加，便是所求"""
         alpha = self.CalAlphaTable(target)
         print('alphaTable:\n',alpha)
-        print('"',target,'"',"'s Probability:",alpha[-1,:].sum(dtype = np.float32))
+        print('"',target,'"',"'s Probability:", alpha[-1,:].sum(dtype = np.float32))
         return
     
 if __name__ == '__main__' :
