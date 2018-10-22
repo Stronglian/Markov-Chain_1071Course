@@ -23,66 +23,98 @@ class HidenMarkovModel_Viterbi():
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix)) \
             or (not len(self.initialStateProb) == len(self.probabilityMatrix)) \
             or (not len(self.initialStateProb) == len(self.stateName)):
-            print("State 數量未對上")
-            raise AssertionError
+            raise AssertionError("State 數量未對上")
         if (not len(self.initialStateProb) == len(self.stateChangeMatrix[:,0])): 
-            print("輸出 數量未對上")
-            raise AssertionError
+            raise AssertionError("輸出 數量未對上")
         return
+    
+#    def a_prob(self, preState, nextState):
+#        """(未使用)從 preState 換到 nextState 的機率"""
+#        prob = self.stateChangeMatrix[preState, nextState]
+#        return prob
+#    
+#    def b_prob(self, state, output):
+#        """(可以簡化進而不使用)從 state 生出 output 的機率"""
+#        prob = self.probabilityMatrix[state, self.stateOutput == output]
+#        return prob
+        
     def CalRoPsiTable(self, target):
         """ """
         T = len(target)
-        #step 0 - table #table - time(-1) - state #ρ (ro)、ψ(psi)
+        # step 0 - table #table - time(-1) - state #ρ (ro)、ψ(psi)
         ro  = np.zeros((len(target), self.stateNumber), dtype = np.float32)
-        psi = np.zeros((len(target), self.stateNumber), dtype = np.float32)
-        #Step 1 – Initialization #psi DONE before
-        ro[0,:] = self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
-        psi[0,:] = np.array([ -1 for i in range(self.stateNumber)])#0 重複意義，故換-1
-        #Step 2 – Recursion
+        psi = np.ones((len(target), self.stateNumber), dtype = np.float32) * -1
+        # step 1 – Initialization #psi DONE before
+        ro[0,:]  = self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
+#        psi[0,:] = np.array([ -1 for i in range(self.stateNumber)])#0 重複意義，故換-1
+        # step 2 – Recursion
         for t in range(1, len(target)):
             for s in range(self.stateNumber):
                 ro[t, s]  = (ro[t-1, s] * self.stateChangeMatrix[:, s]).max() *     \
                             self.probabilityMatrix[s, self.stateOutput == target[t]]
                 psi[t, s] = (ro[t-1, s] * self.stateChangeMatrix[:, s]).argmax() #*  \
 #                            self.probabilityMatrix[s, self.stateOutput == target[t]] #不用算入，因為乘了相對大小還是不變
-        #Step 3 – Termination
-#        P_all  = ro[:,:].max(axis = 1)    #P*
-#        iT_all = ro[:,:].argmax(axis = 1) #i*
-        P_all  = ro[-1,:].max()    #P*
-        iT_all = ro[-1,:].argmax() #i*
+        # step 3 – Termination
+        P_star_all = ro[-1,:].max()    #P*
+        iT_all     = ro[-1,:].argmax() #i*
 #        print(P_all, iT_all)
-        #Step 4 – Path (state sequence) backtracking
+        # step 4 – Path (state sequence) backtracking
         stateSeqIndex = np.array([-1 for i in range(T)])
+#        print(stateSeqIndex)
         stateSeqIndex[-1] = iT_all
         for t in range(len(target)-1, 0, -1):
 #        for t, index in list(enumerate(reversed(iT_all)))[1:]:
-#            print(stateSeqIndex[t])
+#            print(stateSeqIndex)
             stateSeqIndex[t-1] = psi[t, stateSeqIndex[t]]
-#            iT_all[t-1] = psi[t, index]
-#        assert True == False
+        print(stateSeqIndex)
         #另外轉存
         self.roTable = ro
         self.psiTable = psi
-        return ro, psi, P_all, stateSeqIndex
-    def Predict_optimalStateSequence_useRoPsi(self,target):
+        return ro, psi, P_star_all, stateSeqIndex
+    
+    def Predict_optimalStateSequence_useRoPsi(self,target, boolPrint = True):
         """ """
         ro, psi, bestProb, bestStateSquenceIndex = self.CalRoPsiTable(target)
         #The best state sequence having the highest probability
-        print('"',target,'"',"'s Probability:", bestProb)#,beta[0,:].sum(dtype = np.float32))
+#        if boolPrint:
+        print('"',target,'"',"'s Probability:", bestProb) #,beta[0,:].sum(dtype = np.float32))
         seqLis = []
         for indexTmp in bestStateSquenceIndex: #ro[:,:].argmax(axis = 1):
             seqLis.append(self.stateName[indexTmp])
-        print('"',target,'"',"'s Optimal State Sequence is", seqLis)
-        return
+        if boolPrint:
+            print('"',target,'"',"'s Optimal State Sequence is", seqLis)
+        return bestProb
+    
 if __name__ == '__main__' :
     import time
     startTime = time.time()
     print("START\n\n")
     
     test = HidenMarkovModel_Viterbi()
-    test.Predict_optimalStateSequence_useRoPsi(target = "123456")
-    ro, psi = test.roTable, test.psiTable
+#    test.Predict_optimalStateSequence_useRoPsi(target = "666")
+#    test.Predict_optimalStateSequence_useRoPsi(target = "123456")
+    test.Predict_optimalStateSequence_useRoPsi(target = "664321")# state seq!
+#    test.Predict_optimalStateSequence_useRoPsi(target = "111666")
+#    test.Predict_optimalStateSequence_useRoPsi(target = "162636")
+#    test.Predict_optimalStateSequence_useRoPsi(target = "126656")
+#    ro, psi = test.roTable, test.psiTable
     
+#    aLL = 0
+#    for s_0 in range(1,7):
+#        s_0 = str(s_0)
+#        for s_1 in range(1,7):
+#            s_1 = str(s_1)
+#            for s_2 in range(1,7):
+#                s_2 = str(s_2)
+#                for s_3 in range(1,7):
+#                    s_3 = str(s_3)
+#                    for s_4 in range(1,7):
+#                        s_4 = str(s_4)
+#                        for s_5 in range(1,7):
+#                            s_5 = str(s_5)
+#                            print( s_0+s_1+s_2+s_3+s_4+s_5)
+#                            aLL += test.Predict_optimalStateSequence_useRoPsi(target = s_0+s_1+s_2+s_3+s_4+s_5, boolPrint=False)
+#    print(aLL) #不會為 1
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
 
