@@ -89,12 +89,11 @@ if __name__ == '__main__' :
         stringProb, optimalStateSeq = viterbi.Predict_optimalStateSequence_useRoPsi(outputString, boolPrint=False)
         # 計算
     #    print(sum(abs(optimalStateSeq - outputState))) #錯誤個數
-        accuracyV = (list(optimalStateSeq - outputState).count(0))/float(stringLen)
 #        accuracyV = (stringLen - sum(abs(optimalStateSeq - outputState)))/stringLen
-#        print(accuracyV)
+        accuracyV = (list(optimalStateSeq - outputState).count(0))/float(stringLen) #以正確來算
         # 紀錄
         recordC.RecordFunc(accuracyV)
-#        accuracySum += accuracyV
+#        accuracySum += accuracyV #全部讓class處理
         
 #    print(accuracySum/stringAmount)
     recordC.ShowResult(printSting = "Accuracy")
