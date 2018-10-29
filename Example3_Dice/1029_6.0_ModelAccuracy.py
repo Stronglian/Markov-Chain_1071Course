@@ -15,9 +15,8 @@ from c1015_3_5_0_ViterbiAlgorithm import HidenMarkovModel_Viterbi
 class NumberRecord_MaxMinCount():
     def __init__(self):#, maxVal = 100.0, minVal = 0.0):
         """ 定義會遇到的最大與最小，直接拿第一次做標準"""
-#        self.maxNum = minVal
-#        self.minNum = maxVal
         self.__boolFirst__ = True
+        
         self.countAmount = 0
         self.sumTmp = 0.0
         self.DictCount = {}
@@ -88,12 +87,9 @@ if __name__ == '__main__' :
         outputString, outputState = genaral.CalOneRound(stringLen)
         stringProb, optimalStateSeq = viterbi.Predict_optimalStateSequence_useRoPsi(outputString, boolPrint=False)
         # 計算
-    #    print(sum(abs(optimalStateSeq - outputState))) #錯誤個數
-#        accuracyV = (stringLen - sum(abs(optimalStateSeq - outputState)))/stringLen
         accuracyV = (list(optimalStateSeq - outputState).count(0))/float(stringLen) #以正確來算
         # 紀錄
         recordC.RecordFunc(accuracyV)
-#        accuracySum += accuracyV #全部讓class處理
         
 #    print(accuracySum/stringAmount)
     recordC.ShowResult(printSting = "Accuracy")
