@@ -34,7 +34,7 @@ class NumberRecord_MaxMinCount():
         return
     
     def RecordFunc(self, inputNum):
-        """ 直接拿第一次做標準 """
+        """ 數字進來做紀錄，主要功能：中途 flow、比大小 """
         #計算數量
         self.CountAmount(inputNum)
         self.countAmount += 1
