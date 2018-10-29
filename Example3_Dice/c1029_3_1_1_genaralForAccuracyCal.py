@@ -7,7 +7,7 @@ Created on Mon Oct  8 18:38:23 2018
 
 
 import numpy as np
-import random
+#import random
 
 class HidenMarkovModel_genaral():
     def __init__(self):
