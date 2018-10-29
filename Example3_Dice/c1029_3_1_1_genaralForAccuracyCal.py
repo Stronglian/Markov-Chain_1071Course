@@ -7,7 +7,7 @@ Created on Mon Oct  8 18:38:23 2018
 
 
 import numpy as np
-#import random
+#import random #改用numpy.random
 
 class HidenMarkovModel_genaral():
     def __init__(self):
@@ -67,7 +67,7 @@ class HidenMarkovModel_genaral():
         repeatTimes = len(targetSeq)
         targetNum = 0
         for t in range(self.frequency):
-            preO = self.CalOneRound(repeatTimes = repeatTimes)
+            preO, stateSeq = self.CalOneRound(repeatTimes = repeatTimes)
             if preO == targetSeq:
                 targetNum +=1
         if printTF:
