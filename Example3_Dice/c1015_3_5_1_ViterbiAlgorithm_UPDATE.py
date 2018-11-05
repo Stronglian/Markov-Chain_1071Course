@@ -48,22 +48,24 @@ class HidenMarkovModel_Viterbi():
         ro[0,:]  = self.initialStateProb.T * self.probabilityMatrix[:, self.stateOutput == target[0]].T[0]
         
         # step 2 – Recursion
-        tmpArr = np.zeros((self.stateNumber))
+#        tmpArr = np.zeros((self.stateNumber))
+        tmpArr = np.zeros((self.stateNumber, self.stateNumber))
         for t in range(1, len(target)):
             tmpArr = np.zeros_like(tmpArr)
+            ### 法一
 #            print("\""+str(t)+"\"", "="*10)
-            for s in range(self.stateNumber):
-#                print(ro[t-1, s] , self.stateChangeMatrix[:, s] , self.probabilityMatrix[s, self.stateOutput == target[t]] , sep = "\n")
-                tmpArr = ro[t-1, :] * self.stateChangeMatrix[:, s] * self.probabilityMatrix[s, self.stateOutput == target[t]][0]
-                ro[t, s]  = tmpArr.max() #* self.probabilityMatrix[s, self.stateOutput == target[t]]
-                psi[t, s] = tmpArr.argmax()
-                
-                print("##", tmpArr, ro[t, s], sep='\n')
-            
-#            tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :] * self.probabilityMatrix[:, self.stateOutput == target[t]]
-#            print(t, "\n", tmpArr)
-#            ro[t, :]  = tmpArr.max(axis = 0)
-#            psi[t, :] = tmpArr.argmax(axis = 0) 
+#            for s in range(self.stateNumber):
+##                print(ro[t-1, s] , self.stateChangeMatrix[:, s] , self.probabilityMatrix[s, self.stateOutput == target[t]] , sep = "\n")
+#                tmpArr = ro[t-1, :] * self.stateChangeMatrix[:, s] * self.probabilityMatrix[s, self.stateOutput == target[t]][0]
+#                ro[t, s]  = tmpArr.max() #* self.probabilityMatrix[s, self.stateOutput == target[t]]
+#                psi[t, s] = tmpArr.argmax()
+#                
+#                print("##", tmpArr, ro[t, s], sep='\n')
+            ### 法二
+            tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :].T * self.probabilityMatrix[:, self.stateOutput == target[t]]
+            print(t, "\n", tmpArr)
+            ro[t, :]  = tmpArr.max(axis = 1)
+            psi[t, :] = tmpArr.argmax(axis = 1) 
         #另外轉存
         self.roTable = ro.copy()
         self.psiTable = psi.copy()

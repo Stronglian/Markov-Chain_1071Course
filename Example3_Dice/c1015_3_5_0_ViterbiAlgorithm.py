@@ -4,7 +4,7 @@ Created on Mon Oct 15 15:37:23 2018
 """
 import numpy as np
 #import random
-np.set_printoptions(suppress=True)
+np.set_printoptions(suppress=False)
 class HidenMarkovModel_Viterbi():
     def __init__(self):
         #state
@@ -49,8 +49,10 @@ class HidenMarkovModel_Viterbi():
 #        print(self.initialStateProb ,"\n",  self.probabilityMatrix[:, self.stateOutput == target[0]].T[0], "\n")
 #        psi[0,:] = np.array([ -1 for i in range(self.stateNumber)])#0 重複意義，故換-1
         # step 2 – Recursion
-        tmpArr = np.zeros((2,2))
+        tmpArr = np.zeros((self.stateNumber, self.stateNumber))
         for t in range(1, len(target)):
+            tmpArr = np.zeros_like(tmpArr)
+            print("\""+str(t)+"\"", "="*10)
 #            for s in range(self.stateNumber):
 #                tmpArr[:, s] = ro[t-1, s] * self.stateChangeMatrix[:, s] * self.probabilityMatrix[s, self.stateOutput == target[t]]
             
@@ -62,9 +64,10 @@ class HidenMarkovModel_Viterbi():
 
 #            print("ro", ro[t-1, :] , "Change", self.stateChangeMatrix[:, :], 
 #                  "Prob", self.probabilityMatrix[:, self.stateOutput == target[t]].T[0], sep = "\n")
-            tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :] * self.probabilityMatrix[:, self.stateOutput == target[t]].T[0]
-            ro[t, :]  = tmpArr.max(axis = 0)
-            psi[t, :] = tmpArr.argmax(axis = 0)
+            tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :].T * self.probabilityMatrix[:, self.stateOutput == target[t]]
+            print(tmpArr)
+            ro[t, :]  = tmpArr.max(axis = 1)
+            psi[t, :] = tmpArr.argmax(axis = 1)
             
         #另外轉存
         self.roTable = ro.copy()
