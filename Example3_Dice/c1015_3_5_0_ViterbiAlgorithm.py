@@ -53,14 +53,18 @@ class HidenMarkovModel_Viterbi():
         for t in range(1, len(target)):
 #            for s in range(self.stateNumber):
 #                tmpArr[:, s] = ro[t-1, s] * self.stateChangeMatrix[:, s] * self.probabilityMatrix[s, self.stateOutput == target[t]]
-##                print((ro[t-1, s] * self.stateChangeMatrix[:, s]).max())# *     \
-##                ro[t, s]  = (ro[t-1, s] * self.stateChangeMatrix[:, s]).max() *     \
-##                            self.probabilityMatrix[s, self.stateOutput == target[t]]
-##                psi[t, s] = (ro[t-1, s] * self.stateChangeMatrix[:, s]).argmax() #*  \
-###                            self.probabilityMatrix[s, self.stateOutput == target[t]] #不用算入，因為乘了相對大小還是不變
+            
+#                print((ro[t-1, s] * self.stateChangeMatrix[:, s]).max())# *     \
+#            print(( (ro[t-1, :] * self.stateChangeMatrix[:, :])*     \
+#                            self.probabilityMatrix[:, self.stateOutput == target[t]]).max(axis = 1))
+#                psi[t, s] = (ro[t-1, s] * self.stateChangeMatrix[:, s]).argmax() #*  \
+#                            self.probabilityMatrix[s, self.stateOutput == target[t]] #不用算入，因為乘了相對大小還是不變
+
+#            print("ro", ro[t-1, :] , "Change", self.stateChangeMatrix[:, :], 
+#                  "Prob", self.probabilityMatrix[:, self.stateOutput == target[t]].T[0], sep = "\n")
             tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :] * self.probabilityMatrix[:, self.stateOutput == target[t]].T[0]
-            ro[t, :]  = (tmpArr).max(axis = 1)
-            psi[t, :] = (tmpArr).argmax(axis = 1) 
+            ro[t, :]  = tmpArr.max(axis = 1)
+            psi[t, :] = tmpArr.argmax(axis = 1) 
             
         self.roTable = ro.copy()
         self.psiTable = psi.copy()
@@ -108,25 +112,9 @@ if __name__ == '__main__' :
 #    test.Predict_optimalStateSequence_useRoPsi(target = "111666")
 #    test.Predict_optimalStateSequence_useRoPsi(target = "162636")
 #    test.Predict_optimalStateSequence_useRoPsi(target = "126656")
-    test.Predict_optimalStateSequence_useRoPsi(target = "1"*10+"6"*6)
+    test.Predict_optimalStateSequence_useRoPsi(target = "1"*6+"6"*6)
     ro, psi = test.roTable, test.psiTable
     
-#    aLL = 0
-#    for s_0 in range(1,7):
-#        s_0 = str(s_0)
-#        for s_1 in range(1,7):
-#            s_1 = str(s_1)
-#            for s_2 in range(1,7):
-#                s_2 = str(s_2)
-#                for s_3 in range(1,7):
-#                    s_3 = str(s_3)
-#                    for s_4 in range(1,7):
-#                        s_4 = str(s_4)
-#                        for s_5 in range(1,7):
-#                            s_5 = str(s_5)
-#                            print( s_0+s_1+s_2+s_3+s_4+s_5)
-#                            aLL += test.Predict_optimalStateSequence_useRoPsi(target = s_0+s_1+s_2+s_3+s_4+s_5, boolPrint=False)
-#    print(aLL) #不會為 1
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
 
