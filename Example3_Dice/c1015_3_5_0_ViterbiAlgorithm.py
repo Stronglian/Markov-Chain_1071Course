@@ -52,20 +52,9 @@ class HidenMarkovModel_Viterbi():
         tmpArr = np.zeros((self.stateNumber, self.stateNumber))
         for t in range(1, len(target)):
             tmpArr = np.zeros_like(tmpArr)
-            print("\""+str(t)+"\"", "="*10)
-#            for s in range(self.stateNumber):
-#                tmpArr[:, s] = ro[t-1, s] * self.stateChangeMatrix[:, s] * self.probabilityMatrix[s, self.stateOutput == target[t]]
-            
-#                print((ro[t-1, s] * self.stateChangeMatrix[:, s]).max())# *     \
-#            print(( (ro[t-1, :] * self.stateChangeMatrix[:, :])*     \
-#                            self.probabilityMatrix[:, self.stateOutput == target[t]]).max(axis = 1))
-#                psi[t, s] = (ro[t-1, s] * self.stateChangeMatrix[:, s]).argmax() #*  \
-#                            self.probabilityMatrix[s, self.stateOutput == target[t]] #不用算入，因為乘了相對大小還是不變
-
-#            print("ro", ro[t-1, :] , "Change", self.stateChangeMatrix[:, :], 
-#                  "Prob", self.probabilityMatrix[:, self.stateOutput == target[t]].T[0], sep = "\n")
+#            print("\""+str(t)+"\"", "="*10)
             tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :].T * self.probabilityMatrix[:, self.stateOutput == target[t]]
-            print(tmpArr)
+#            print(tmpArr)
             ro[t, :]  = tmpArr.max(axis = 1)
             psi[t, :] = tmpArr.argmax(axis = 1)
             
