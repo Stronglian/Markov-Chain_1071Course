@@ -51,8 +51,7 @@ class NumberRecord_MaxMinCount():
         return
     
     def CountAmount(self, inputNum, roundAxis = 2):
-        """ """
-        #記錄到 dict
+        """ 記錄到 dict """
         if round(inputNum, roundAxis) not in self.DictCount.keys():
             self.DictCount[round(inputNum, roundAxis)] = 1
         else:
@@ -60,38 +59,46 @@ class NumberRecord_MaxMinCount():
         return
     
     def ShowResult(self, printSting="", lineNum = 0.5):
-        print(printSting, "max:", self.maxNum, " min:", self.minNum, "avg:", self.sumTmp/self.countAmount)
+        """ """
+        print(printSting, "max:", self.maxNum, " min:", self.minNum, "avg:", round(self.sumTmp/self.countAmount,4), "there are", self.countAmount, "data.")
         #計數
         countNum = 0
         for i_key in self.DictCount.keys():
-            if i_key < 0.5:
+            if i_key < lineNum:
                 countNum += self.DictCount[i_key]
-#        print(list(self.DictCount.keys()))
+        
         print(printSting, "<", lineNum, "have", countNum)
         return
+    
 if __name__ == '__main__' :
     import time
     startTime = time.time()
     print("START\n\n")
     
-    genaral = HidenMarkovModel_genaral()
-    viterbi = HidenMarkovModel_Viterbi()
-    recordC = NumberRecord_MaxMinCount()
-    
     stringAmount = 100 #100組
     stringLen    = 100 #長度100
     
+#    genaral = HidenMarkovModel_genaral()
+    speciData = np.load("100Observation.npy")
+    viterbi = HidenMarkovModel_Viterbi()
+    recordC = NumberRecord_MaxMinCount()
+    
+    
     accuracySum = 0
     for i in range(stringAmount):
-        # 生成
-        outputString, outputState = genaral.CalOneRound(stringLen)
+#        # 生成
+#        outputString, outputState = genaral.CalOneRound(stringLen)
+        #取資料
+        data = speciData[i]
+        outputState = data[0] #speciData[i]
+        outputString = "".join(list(map(str, data[1])))
+        # 預測
         stringProb, optimalStateSeq = viterbi.Predict_optimalStateSequence_useRoPsi(outputString, boolPrint=False)
         # 計算
         accuracyV = (list(optimalStateSeq - outputState).count(0))/float(stringLen) #以正確來算
         # 紀錄
         recordC.RecordFunc(accuracyV)
         
-#    print(accuracySum/stringAmount)
     recordC.ShowResult(printSting = "Accuracy")
     
     endTime = time.time()
