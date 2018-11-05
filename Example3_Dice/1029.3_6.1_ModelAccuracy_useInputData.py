@@ -8,7 +8,8 @@ Created on Mon Oct 29 14:54:29 2018
 import numpy as np
 
 from c1029_3_1_1_genaralForAccuracyCal import HidenMarkovModel_genaral
-from c1015_3_5_0_ViterbiAlgorithm import HidenMarkovModel_Viterbi
+from c1015_3_5_1_ViterbiAlgorithm_UPDATE import HidenMarkovModel_Viterbi
+#from c1015_3_5_0_ViterbiAlgorithm import HidenMarkovModel_Viterbi
 
 #np.random.seed(3)
 
@@ -85,7 +86,8 @@ if __name__ == '__main__' :
     
     
     accuracySum = 0
-    for i in range(stringAmount):
+#    for i in range(stringAmount):
+    for i in range(1): #0.82
 #        # 生成
 #        outputString, outputState = genaral.CalOneRound(stringLen)
         #取資料
