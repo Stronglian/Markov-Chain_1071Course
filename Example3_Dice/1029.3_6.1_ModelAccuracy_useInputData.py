@@ -86,8 +86,8 @@ if __name__ == '__main__' :
     
     
     accuracySum = 0
-#    for i in range(stringAmount):
-    for i in range(1): #0.82
+    for i in range(stringAmount):
+#    for i in range(1): #0.82
 #        # 生成
 #        outputString, outputState = genaral.CalOneRound(stringLen)
         #取資料
