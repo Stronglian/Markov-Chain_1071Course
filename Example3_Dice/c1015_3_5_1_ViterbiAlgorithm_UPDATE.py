@@ -55,18 +55,11 @@ class HidenMarkovModel_Viterbi():
             for s in range(self.stateNumber):
 #                print(ro[t-1, s] , self.stateChangeMatrix[:, s] , self.probabilityMatrix[s, self.stateOutput == target[t]] , sep = "\n")
                 tmpArr = ro[t-1, :] * self.stateChangeMatrix[:, s] * self.probabilityMatrix[s, self.stateOutput == target[t]][0]
-#                print("=", tmpArr)
-#            print(tmpArr)
-#            for s in range(self.stateNumber):
                 ro[t, s]  = tmpArr.max() #* self.probabilityMatrix[s, self.stateOutput == target[t]]
                 psi[t, s] = tmpArr.argmax()
                 
                 print("##", tmpArr, ro[t, s], sep='\n')
             
-            
-            
-#            print("ro", ro[t-1, :] , "Change", self.stateChangeMatrix[:, :], 
-#                  "Prob", self.probabilityMatrix[:, self.stateOutput == target[t]].T[0], sep = "\n")
 #            tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :] * self.probabilityMatrix[:, self.stateOutput == target[t]]
 #            print(t, "\n", tmpArr)
 #            ro[t, :]  = tmpArr.max(axis = 0)
