@@ -66,6 +66,7 @@ class HidenMarkovModel_Viterbi():
             ro[t, :]  = tmpArr.max(axis = 0)
             psi[t, :] = tmpArr.argmax(axis = 0)
             
+        #另外轉存
         self.roTable = ro.copy()
         self.psiTable = psi.copy()
         # step 3 – Termination
@@ -81,9 +82,6 @@ class HidenMarkovModel_Viterbi():
 #            print(stateSeqIndex)
             stateSeqIndex[t-1] = psi[t, stateSeqIndex[t]]
 #        print(stateSeqIndex)
-        #另外轉存
-#        self.roTable = ro.copy()
-#        self.psiTable = psi.copy()
         return ro, psi, P_star_all, stateSeqIndex
     
     def Predict_optimalStateSequence_useRoPsi(self,target, boolPrint = True):
