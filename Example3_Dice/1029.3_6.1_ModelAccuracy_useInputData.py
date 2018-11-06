@@ -7,7 +7,7 @@ Created on Mon Oct 29 14:54:29 2018
 
 import numpy as np
 
-from c1029_3_1_1_genaralForAccuracyCal import HidenMarkovModel_genaral
+#from c1029_3_1_1_genaralForAccuracyCal import HidenMarkovModel_genaral
 from c1015_3_5_1_ViterbiAlgorithm_UPDATE import HidenMarkovModel_Viterbi
 #from c1015_3_5_0_ViterbiAlgorithm import HidenMarkovModel_Viterbi
 
