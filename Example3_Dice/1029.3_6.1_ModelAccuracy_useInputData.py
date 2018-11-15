@@ -81,7 +81,7 @@ if __name__ == '__main__' :
     
 #    genaral = HidenMarkovModel_genaral()
     speciData = np.load("100Observation.npy")
-    viterbi = HidenMarkovModel_Viterbi()
+    testClass = HidenMarkovModel_Viterbi()
     recordC = NumberRecord_MaxMinCount()
     
     
@@ -90,12 +90,13 @@ if __name__ == '__main__' :
 #    for i in range(1): #0.82
 #        # 生成
 #        outputString, outputState = genaral.CalOneRound(stringLen)
-        #取資料
+        # 或 取資料
         data = speciData[i]
         outputState = data[0] #speciData[i]
-        outputString = "".join(list(map(str, data[1])))
+#        outputString = "".join(list(map(str, data[1])))
+        outputString = data[1]
         # 預測
-        stringProb, optimalStateSeq = viterbi.Predict_optimalStateSequence_useRoPsi(outputString, boolPrint=False)
+        stringProb, optimalStateSeq = testClass.Predict_optimalStateSequence_useRoPsi(outputString, boolPrint=False)
         # 計算
         accuracyV = (list(optimalStateSeq - outputState).count(0))/float(stringLen) #以正確來算
         # 紀錄

@@ -91,7 +91,7 @@ class HidenMarkovModel_gamma():
                 beta[t-1, s] = np.multiply(np.multiply( a_prob, b_prob), beta[t, :]).sum()
 #            print('beta['+str(t-1)+', :]', beta[t-1, :], '\n\n\n')
 #            assert True == False
-        #收尾 t = 0，生成第一個target的機率
+        #收尾 t = 0，生成第一個target的機率 #交給真的收尾輸出
 #        beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
 #        beta[0, :] = beta[0, :] 
         #另外轉存
