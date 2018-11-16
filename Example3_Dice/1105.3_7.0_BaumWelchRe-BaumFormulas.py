@@ -2,7 +2,7 @@
 """
 Created on Sun Nov 11 10:46:31 2018
 
-明明都寫 Matrix 但都設 Array
+明明都變數名稱寫 Matrix ，但都是 Array
 """
 """
 class:
@@ -110,11 +110,11 @@ class HMM_Dice_gamma():
     
     def CalGammaTable(self, target, boolWarningShow = False):
         """ 利用 alpha、beta 來算該 state 發生機率，進而推導最佳 State 順序"""
+#        prob_PrO = beta[0,:].sum(dtype = np.float64) #alpha[-1,:].sum(dtype = np.float64)
         prob_PrO_alpha = self.PredictUseAlpha(target, boolPrint = False)
         prob_PrO_beta  = self.PredictUseBeta (target, boolPrint = False)
         alpha = self.alphaTable
         beta  = self.betaTable
-#        prob_PrO = beta[0,:].sum(dtype = np.float64) #alpha[-1,:].sum(dtype = np.float64)
         if (not prob_PrO_alpha == prob_PrO_beta) and boolWarningShow:
             print("Warnings:", target, "'s alpha(",prob_PrO_alpha,"),beta(",prob_PrO_beta,")結果不同")
 #        print("==>:", target, "'s alpha(",prob_PrO,"),beta(",prob_PrO_beta,")")
@@ -143,7 +143,6 @@ class HMM_Dice_gamma():
 class HMM_Dice_Viterbi(HMM_Dice_gamma):
     def __init__(self, initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput):
         super().__init__(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
-        
         return
     
     def CalRoPsiTable(self, target):
@@ -196,7 +195,6 @@ class HMM_Dice_Viterbi(HMM_Dice_gamma):
 class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
     def __init__(self, initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput):
         super().__init__(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
-        
         return
     
     def CalZetaTalbe(self, target):
@@ -240,7 +238,7 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
                     
         return self.initialStateProb, self.stateChangeMatrix, self.probabilityMatrix
     
-    def Test(self, testData, parmSet = None):
+    def Test(self, testData, parmSet = None, boolPrint = True):
         """ 利用測試資料集，配合已經訓練完的參數，進行預測"""
         # 使用額外的參數
         tmpClass = self
@@ -260,6 +258,8 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
             sameStateNumber = np.count_nonzero((outputState - optimal_Seq)==0)
             finalProb += sameStateNumber / len(outputState)
         finalProb /= testData.shape[0]
+        if boolPrint:
+            print("Accuracy is", finalProb)
         return finalProb
 #%% 預先處理用
 def ChangeFormatToUse(inputArr):
@@ -311,7 +311,6 @@ if __name__ == '__main__' :
     HMM_trainResult = HMM_B.Train(trainData)
     # test
     test_result = HMM_B.Test(testData)
-    print("test_result is", test_result)
     # coe
     HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
     HMM_zeta = HMM_B.zetaTable
