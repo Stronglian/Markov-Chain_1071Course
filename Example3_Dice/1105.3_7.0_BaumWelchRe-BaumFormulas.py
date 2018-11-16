@@ -248,7 +248,9 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
             #take the coefficient after training to Viterbi
             optimal_Prob, optimal_Seq = self.Predict_optimalStateSequence_useViterbi(inputTarget, boolPrint=False)
             # count Accuracy
-            sameStateNumber = len((outputState - optimal_Seq) == 0)
+#            tmp = (outputState - optimal_Seq)
+#            sameStateNumber = len( tmp[tmp == 0])
+            sameStateNumber = np.count_nonzero((outputState - optimal_Seq)==0)
             finalProb += sameStateNumber / len(outputState)
         print(sameStateNumber, outputState - optimal_Seq)
         finalProb /= testData.shape[0]
