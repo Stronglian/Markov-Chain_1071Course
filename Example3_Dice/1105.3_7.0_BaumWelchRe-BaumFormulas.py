@@ -9,6 +9,8 @@ class:
     https://www.brilliantcode.net/761/python-3-6-class/
 wiki:
     https://en.wikipedia.org/wiki/Baum%E2%80%93Welch_algorithm
+someone's slide:
+    https://people.cs.umass.edu/~mccallum/courses/inlp2004a/lect10-hmm2.pdf
 """
 import numpy as np
 #import warnings
