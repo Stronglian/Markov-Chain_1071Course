@@ -7,6 +7,8 @@ Created on Sun Nov 11 10:46:31 2018
 """
 class:
     https://www.brilliantcode.net/761/python-3-6-class/
+wiki:
+    https://en.wikipedia.org/wiki/Baum%E2%80%93Welch_algorithm
 """
 import numpy as np
 #import warnings
@@ -61,12 +63,12 @@ class HMM_Dice_gamma():
         b: 該狀態輸出該物機率；self.probabilityMatrix[state, self.stateOutput == output]
         """
         #alpha - time(-1) - state
-        alpha = np.zeros((len(target), self.stateNumber), dtype = np.float32)
+        alpha = np.zeros((len(target), self.stateNumber), dtype = np.float64)
         #初始 t = 0，生成第一個target的機率
         alpha[0, :] = self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
         #剩下的字串
         for t in range(1, len(target)):
-            tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix.T).sum(axis = 1, dtype = np.float32)
+            tempSum = np.multiply(alpha[t-1,:], self.stateChangeMatrix.T).sum(axis = 1, dtype = np.float64)
             #print(tempSum)
             alpha[t, :] = np.multiply(tempSum, self.probabilityMatrix[:, self.stateOutput == target[t]].T)#self.b_prob(j, target[t])
         #另外轉存
@@ -76,7 +78,7 @@ class HMM_Dice_gamma():
     def PredictUseAlpha(self, target, boolPrint = True):
         """ 將 Alpha 最後兩組相加，便是所求字串發生機率"""
         alpha = self.CalAlphaTable(target)
-        prob_ProO_alpha = alpha[-1,:].sum(dtype = np.float32)
+        prob_ProO_alpha = alpha[-1,:].sum(dtype = np.float64)
         if boolPrint:
             print('alphaTable:\n',alpha)
             print('"',target,'"',"'s Probability:", prob_ProO_alpha)
@@ -89,7 +91,7 @@ class HMM_Dice_gamma():
         b: 該狀態輸出該物機率；self.probabilityMatrix[state, self.stateOutput == output]
         """
         #beta - time(-1) - state
-        beta = np.zeros((len(target), self.stateNumber), dtype = np.float32)
+        beta = np.zeros((len(target), self.stateNumber), dtype = np.float64)
         #初始 t = T
         beta[-1, :] = np.ones(len(beta[-1, :]))
 #        print(beta[-1,:])
@@ -114,13 +116,13 @@ class HMM_Dice_gamma():
     def PredictUseBeta(self, target, boolPrint=True):
         """ 將 Beta 最前兩組相加，便是所求"""
         beta = self.CalBetaTable(target)
-        prob_PrO_bata = (beta[0,:] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T).sum(dtype = np.float32)
+        prob_PrO_bata = (beta[0,:] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T).sum(dtype = np.float64)
         if boolPrint:
             print('betaTable:\n',beta)
             print('"',target,'"',"'s Probability:", prob_PrO_bata)
         return prob_PrO_bata
     
-    def CalGammaTable(self, target):
+    def CalGammaTable(self, target, boolWarningShow = False):
         """ 利用 alpha、beta 來算該 state 發生機率，進而推導最佳 State 順序"""
 #        alpha = self.CalAlphaTable(target)
 #        beta = self.CalBetaTable(target)
@@ -128,14 +130,12 @@ class HMM_Dice_gamma():
         prob_PrO_beta = self.PredictUseBeta (target, boolPrint = False)
         alpha = self.alphaTable
         beta = self.betaTable
-#        prob_PrO = beta[0,:].sum(dtype = np.float32) #alpha[-1,:].sum(dtype = np.float32)
-        if not prob_PrO == prob_PrO_beta:
-#            raise AssertionError("alpha(",prob_PrO,"),beta(",prob_PrO_beta,")結果不同")
-#            warnings.warn("Warning...........Message")
-#            warnings.warn("alpha( "+str(prob_PrO)," ),beta( "+str(prob_PrO_beta)+" )結果不同")
-            print("Warnings:", "alpha(",prob_PrO,"),beta(",prob_PrO_beta,")結果不同")
+#        prob_PrO = beta[0,:].sum(dtype = np.float64) #alpha[-1,:].sum(dtype = np.float64)
+        if (not prob_PrO == prob_PrO_beta) and boolWarningShow:
+            print("Warnings:", target, "'s alpha(",prob_PrO,"),beta(",prob_PrO_beta,")結果不同")
+        print("==>:", target, "'s alpha(",prob_PrO,"),beta(",prob_PrO_beta,")")
         #gamma - time(-1) - state
-        gamma = np.zeros((len(target), self.stateNumber), dtype = np.float32)
+        gamma = np.zeros((len(target), self.stateNumber), dtype = np.float64)
         gamma = (alpha * beta) / prob_PrO
         #另外轉存
         self.gammaTable = gamma
@@ -162,21 +162,46 @@ class HMM_Dice_BaumWelch(HMM_Dice_gamma):
         super().__init__(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
         
         return
+    
     def CalZetaTalbe(self, target):
         """ """
         gamma = self.CalGammaTable(target)
+        alpha = self.alphaTable
+        beta = self.betaTable
+        prob_PrO = self.prob_PrO
         
-        zeta = np.zeros((len(target)-1, self.stateNumber, self.stateNumber))
-        
-        
-        return
+        #zeta - time(t)(-1) - currectState - nextState
+        zeta = np.zeros((len(target)-1, self.stateNumber, self.stateNumber), dtype = np.float64)
+        # 法一 - for
+        for t in range(len(target) - 1):
+            for i in range(self.stateNumber):
+                for j in range(self.stateNumber):
+                    zeta[t, i, j] = alpha[t, i] * self.stateChangeMatrix[i, j] * \
+                    self.probabilityMatrix[j, self.stateOutput == target[t+1]] * beta[t, j] / prob_PrO
+        self.zetaTable = zeta.copy()
+        return zeta
+    
     def Train(self, trainData):
-        for dataTmp in trainData[0]:
+        # 代稱
+        A = self.stateChangeMatrix
+        B = self.probabilityMatrix
+        for dataTmp in trainData:
+            # initial
             outputState = dataTmp[0]
-            target = dataTmp[1]
-            
-            self.CalZetaTalbe(target)
-            
+            inputTarget = dataTmp[1]
+#            print(inputTarget, outputState, sep='\n')
+            # E-STEP:evaluate alpha, beta, gamma, zeta
+            zeta  = self.CalZetaTalbe(inputTarget)
+            gamma = self.gammaTable
+            # M-STEP:
+            for i in range(self.stateNumber):
+                self.initialStateProb[i] = self.gammaTable[0, i]
+                for count_k in range(len(inputTarget)): #NO <================
+                    B[i, self.stateOutput == inputTarget[count_k]] = gamma[:, i].sum()/gamma[:, i].sum() 
+                for j in range(self.stateNumber): 
+                    A[i, j] = zeta[:-1, i, j].sum() /gamma[:-1, i].sum() 
+                    
+            break
         return
 #%%
 def ChangeFormatToUse(inputArr):
@@ -205,8 +230,8 @@ if __name__ == '__main__' :
                                   [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair
     # name
     stateName = ['fair', 'unfair']
-    stateOutput = np.array([ str(i) for i in range(1, len(probabilityMatrix[0,:])+1)]) 
-#    stateOutput = np.array([ i for i in range(1, len(probabilityMatrix[0,:])+1)]) #這樣就可以用非字串格式了
+#    stateOutput = np.array([ str(i) for i in range(1, len(probabilityMatrix[0,:])+1)]) 
+    stateOutput = np.array([ i for i in range(1, len(probabilityMatrix[0,:])+1)]) #這樣就可以用非字串格式了
     #%% 輸入
     trainData = np.load("100Observation.npy")
     testData  = np.load("100seqTest.npy")
@@ -215,8 +240,12 @@ if __name__ == '__main__' :
 #    testData_edit  = ChangeFormatToUse(testData)
     #%%
     test = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
-    test.CalZetaTalbe(target = "132456")
+#    zeta = test.CalZetaTalbe(target = "132456")
+    
+    test.Train(trainData)
+    
     alpha, beta, gamma = test.alphaTable, test.betaTable, test.gammaTable
+    zeta = test.zetaTable
     
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
