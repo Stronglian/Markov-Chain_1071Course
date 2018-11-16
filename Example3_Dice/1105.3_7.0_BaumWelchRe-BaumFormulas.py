@@ -16,7 +16,6 @@ import numpy as np
 #class HidenMarkovModel_gamma():
 class HMM_Dice_gamma():
     def __init__(self, initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput):
-        
         # state
         self.initialStateProb   = initialStateProb.copy()
         # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
@@ -27,24 +26,14 @@ class HMM_Dice_gamma():
         # output
         self.stateName   = stateName.copy()
         self.stateOutput = stateOutput.copy()
-#        # output
-#        self.stateName = ['fair', 'unfair']
-##        self.stateOutput = np.array([str(i) for i in range(1, len(self.probabilityMatrix[0,:])+1)])
-#        self.stateOutput = np.array([ i for i in range(1, len(self.probabilityMatrix[0,:])+1)]) #這樣就可以用非字串格式了
         #
         self.stateNumber  = len(self.initialStateProb) 
         self.outputNumber = len(probabilityMatrix[0,:])
         #驗證資料正確性
-        assert len(self.initialStateProb) == len(self.stateChangeMatrix)
-        assert len(self.initialStateProb) == len(self.probabilityMatrix)
-        assert len(self.initialStateProb) == len(self.stateName)
-        assert len(self.initialStateProb) == len(self.stateChangeMatrix[:,0])
-#        if (not len(self.initialStateProb) == len(self.stateChangeMatrix)) \
-#            or (not len(self.initialStateProb) == len(self.probabilityMatrix)) \
-#            or (not len(self.initialStateProb) == len(self.stateName)):
-#            raise AssertionError("State 數量未對上")
-#        if (not len(self.initialStateProb) == len(self.stateChangeMatrix[:,0])): 
-#            raise AssertionError("輸出 數量未對上")
+        assert len(self.initialStateProb) == len(self.stateChangeMatrix),      "State 數量未對上"
+        assert len(self.initialStateProb) == len(self.probabilityMatrix),      "State 數量未對上"
+        assert len(self.initialStateProb) == len(self.stateName),              "State 數量未對上"
+        assert len(self.initialStateProb) == len(self.stateChangeMatrix[:,0]), "輸出 數量未對上"
         return
 
 #    def a_prob(self, preState, nextState):
@@ -106,10 +95,6 @@ class HMM_Dice_gamma():
 #                print('a_prob',a_prob,'\nb_prob', b_prob,'\nbeta['+str(t)+','+str(s)+']',beta[t, :])
                 beta[t-1, s] = np.multiply(np.multiply( a_prob, b_prob), beta[t, :]).sum()
 #            print('beta['+str(t-1)+', :]', beta[t-1, :], '\n\n\n')
-#            assert True == False
-        #收尾 t = 0，生成第一個target的機率 #交給真的收尾輸出
-#        beta[0, :] = beta[0, :] * self.initialStateProb * self.probabilityMatrix[:, self.stateOutput == target[0]].T
-#        beta[0, :] = beta[0, :] 
         #另外轉存
         self.betaTable = beta
         return beta
@@ -125,8 +110,6 @@ class HMM_Dice_gamma():
     
     def CalGammaTable(self, target, boolWarningShow = False):
         """ 利用 alpha、beta 來算該 state 發生機率，進而推導最佳 State 順序"""
-#        alpha = self.CalAlphaTable(target)
-#        beta = self.CalBetaTable(target)
         prob_PrO_alpha = self.PredictUseAlpha(target, boolPrint = False)
         prob_PrO_beta  = self.PredictUseBeta (target, boolPrint = False)
         alpha = self.alphaTable
@@ -217,7 +200,7 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
         return
     
     def CalZetaTalbe(self, target):
-        """ """
+        """ 路徑發生機率"""
         gamma    = self.CalGammaTable(target)
         alpha    = self.alphaTable
         beta     = self.betaTable
@@ -235,8 +218,8 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
         return zeta
     
     def Train(self, trainData):
-        """ """
-        # 代稱
+        """ 利用資料急輸入 zeta 來重新訓練各參數"""
+        # 代稱，so NO copy()
         Pi = self.initialStateProb
         A  = self.stateChangeMatrix
         B  = self.probabilityMatrix
@@ -249,15 +232,11 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
             zeta  = self.CalZetaTalbe(inputTarget)
             gamma = self.gammaTable
             # M-STEP:
-            for i in range(self.stateNumber):
+            for i in range(self.stateNumber): 
                 Pi[i] = self.gammaTable[0, i]
-#                for count_k in range(len(inputTarget)): #NO <================
-                for count_k in range(self.outputNumber): 
-#                    index = np.where(inputTarget == (count_k+1))
-#                    B[i, self.stateOutput == inputTarget[count_k]] = gamma[index, i].sum()/gamma[:, i].sum() 
-#                    B[i, count_k] = gamma[index, i].sum()/gamma[:, i].sum() 
+                for count_k in range(self.outputNumber): #計算輸出生成機率
                     B[i, count_k] = gamma[inputTarget == (count_k+1), i].sum()/gamma[:, i].sum() 
-                for j in range(self.stateNumber): 
+                for j in range(self.stateNumber): #計算狀態轉換率
                     A[i, j] = zeta[:-1, i, j].sum() /gamma[:-1, i].sum() 
                     
         return self.initialStateProb, self.stateChangeMatrix, self.probabilityMatrix
@@ -265,13 +244,13 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
     def Test(self, testData):
         """ """
         finalProb = 0.0
-#        for dataTmp in testData:
-#            outputState, inputTarget = dataTmp
         for outputState, inputTarget in testData:
             #take the coefficient after training to Viterbi
             optimal_Prob, optimal_Seq = self.Predict_optimalStateSequence_useViterbi(inputTarget, boolPrint=False)
+            # count Accuracy
             sameStateNumber = len((outputState - optimal_Seq) == 0)
             finalProb += sameStateNumber / len(outputState)
+        print(sameStateNumber, outputState - optimal_Seq)
         finalProb /= testData.shape[0]
         return finalProb
 #%%
@@ -290,30 +269,35 @@ if __name__ == '__main__' :
     import time
     startTime = time.time()
     print("START\n\n")
-    #%% 基本設定
-    #state
-    initialStateProb  = np.array([0.5, 0.5]) #[fair, unfair]
-    # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
+##%% 基本設定 - 原本
+#    #state
+#    initialStateProb   = np.array([0.6, 0.4])#[fair, unfair]
+#    # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
 #    stateChangeMatrix = np.array([[0.95, 0.05],
 #                                  [0.10, 0.90]]) 
+#    #[i][j] 在state i 時，生成j的機率    
+#    probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
+#                                  [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair
+#%% 基本設定 - 題目
+    # state
+    initialStateProb  = np.array([0.5, 0.5]) #[fair, unfair]
+    # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
     stateChangeMatrix = np.array([[0.5, 0.5],
                                   [0.5, 0.5]]) 
     #[i][j] 在state i 時，生成j的機率    
-#    probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
-#                                  [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair
     probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
                                   [ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6]])#unfair
     # name
     stateName = ['fair', 'unfair']
 #    stateOutput = np.array([ str(i) for i in range(1, len(probabilityMatrix[0,:])+1)]) 
     stateOutput = np.array([ i for i in range(1, len(probabilityMatrix[0,:])+1)]) #這樣就可以用非字串格式了
-    #%% 輸入
+#%% 輸入
     trainData = np.load("100Observation.npy")
     testData  = np.load("100seqTest.npy")
 #    #%% 預處理- 改一行 class code 就可以免了~
 #    trainData_edit = ChangeFormatToUse(trainData)
 #    testData_edit  = ChangeFormatToUse(testData)
-    #%%
+#%% 開始
     HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
     # train
     HMM_trainResult = HMM_B.Train(trainData)
@@ -323,6 +307,6 @@ if __name__ == '__main__' :
     # coe
     HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
     HMM_zeta = HMM_B.zetaTable
-    #%% 收尾
+#%% 收尾
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
