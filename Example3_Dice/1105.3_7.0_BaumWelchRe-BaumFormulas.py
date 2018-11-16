@@ -148,17 +148,69 @@ class HMM_Dice_gamma():
         gamma = self.CalGammaTable(target)
         seqLis = []
         probOfOptimalSeq = 1
-#        for t in range(len(target)):
-#            indexTmp = gamma[t, :].argmax()
-#            seqLis.append(self.stateName[indexTmp])
         for i, indexTmp in enumerate(gamma.argmax(axis = 1)):
             probOfOptimalSeq *= gamma[i][indexTmp]
             seqLis.append(self.stateName[indexTmp])
         print('"',target,'"',"'s Optimal State Sequence's Probability:", probOfOptimalSeq)
         print('"',target,'"',"'s Optimal State Sequence is", seqLis)
+        return probOfOptimalSeq, seqLis
+
+#%% from c1015_3_5_1_ViterbiAlgorithm_UPDATE.py edit
+#class HidenMarkovModel_Viterbi():
+class HMM_Dice_Viterbi(HMM_Dice_gamma):
+    def __init__(self, initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput):
+        super().__init__(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
+        
         return
+    
+    def CalRoPsiTable(self, target):
+        """ """
+        lenTarget = len(target)
+        # step 0 - table #table - time(-1) - state #ρ (ro)、ψ(psi)
+        ro  = np.zeros((len(target), self.stateNumber))
+        psi = np.ones((len(target), self.stateNumber)) * -1
+        # step 1 – Initialization #psi DONE before
+        ro[0,:]  = self.initialStateProb.T * self.probabilityMatrix[:, self.stateOutput == target[0]].T[0]
+        
+        # step 2 – Recursion
+        tmpArr = np.zeros((self.stateNumber, self.stateNumber))
+        for t in range(1, len(target)):
+            tmpArr = np.zeros_like(tmpArr)
+            ### 法二
+            tmpArr[:, :] = ro[t-1, :] * self.stateChangeMatrix[:, :].T * self.probabilityMatrix[:, self.stateOutput == target[t]]
+#            print(t, "\n", tmpArr)
+            ro[t, :]  = tmpArr.max(axis = 1)
+            psi[t, :] = tmpArr.argmax(axis = 1) 
+        #另外轉存
+        self.roTable = ro.copy()
+        self.psiTable = psi.copy()
+        # step 3 – Termination
+        P_star_all = ro[-1,:].max().copy()    #P*
+        iT_all     = ro[-1,:].argmax().copy() #i*
+#        print(P_all, iT_all)
+        # step 4 – Path (state sequence) backtracking
+        stateSeqIndex = np.array([-1 for i in range(lenTarget)])
+#        print(stateSeqIndex)
+        stateSeqIndex[-1] = iT_all
+        for t in range(len(target)-1, 0, -1):
+            stateSeqIndex[t-1] = psi[t, stateSeqIndex[t]]
+#        print(stateSeqIndex)
+        return ro, psi, P_star_all, stateSeqIndex
+    
+    def Predict_optimalStateSequence_useViterbi(self,target, boolPrint = True):
+        """ """
+        ro, psi, bestProb, bestStateSquenceIndex = self.CalRoPsiTable(target)
+        #The best state sequence having the highest probability
+        if boolPrint:
+            print('"',target,'"',"'s Probability:", bestProb) 
+        seqLis = []
+        for indexTmp in bestStateSquenceIndex: 
+            seqLis.append(self.stateName[indexTmp])
+        if boolPrint:
+            print('"',target,'"',"'s Optimal State Sequence is", seqLis)
+        return bestProb, bestStateSquenceIndex
 #%%
-class HMM_Dice_BaumWelch(HMM_Dice_gamma):
+class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
     def __init__(self, initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput):
         super().__init__(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
         
@@ -166,9 +218,9 @@ class HMM_Dice_BaumWelch(HMM_Dice_gamma):
     
     def CalZetaTalbe(self, target):
         """ """
-        gamma = self.CalGammaTable(target)
-        alpha = self.alphaTable
-        beta = self.betaTable
+        gamma    = self.CalGammaTable(target)
+        alpha    = self.alphaTable
+        beta     = self.betaTable
         prob_PrO = self.prob_PrO
         
         #zeta - time(t)(-1) - currectState - nextState
@@ -209,6 +261,19 @@ class HMM_Dice_BaumWelch(HMM_Dice_gamma):
                     A[i, j] = zeta[:-1, i, j].sum() /gamma[:-1, i].sum() 
                     
         return self.initialStateProb, self.stateChangeMatrix, self.probabilityMatrix
+    
+    def Test(self, testData):
+        """ """
+        finalProb = 0.0
+#        for dataTmp in testData:
+#            outputState, inputTarget = dataTmp
+        for outputState, inputTarget in testData:
+            #take the coefficient after training to Viterbi
+            optimal_Prob, optimal_Seq = self.Predict_optimalStateSequence_useViterbi(inputTarget, boolPrint=False)
+            sameStateNumber = len((outputState - optimal_Seq) == 0)
+            finalProb += sameStateNumber / len(outputState)
+        finalProb /= testData.shape[0]
+        return finalProb
 #%%
 def ChangeFormatToUse(inputArr):
     """ (多寫的) 將共用格式 狀態(array)、輸出(array) 換成  狀態(array)、輸出(string) """
@@ -250,10 +315,12 @@ if __name__ == '__main__' :
 #    testData_edit  = ChangeFormatToUse(testData)
     #%%
     HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
-#    zeta = test.CalZetaTalbe(target = "132456")
-    
+    # train
     HMM_trainResult = HMM_B.Train(trainData)
-    
+    # test
+    test_result = HMM_B.Test(testData)
+    print("test_result is", test_result)
+    # coe
     HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
     HMM_zeta = HMM_B.zetaTable
     #%% 收尾
