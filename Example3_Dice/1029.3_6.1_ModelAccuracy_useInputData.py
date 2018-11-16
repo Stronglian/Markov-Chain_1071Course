@@ -96,7 +96,7 @@ if __name__ == '__main__' :
 #        outputString = "".join(list(map(str, data[1])))
         outputString = data[1]
         # 預測
-        stringProb, optimalStateSeq = testClass.Predict_optimalStateSequence_useRoPsi(outputString, boolPrint=False)
+        stringProb, optimalStateSeq = testClass.Predict_optimalStateSequence_useViterbi(outputString, boolPrint=False)
         # 計算
         accuracyV = (list(optimalStateSeq - outputState).count(0))/float(stringLen) #以正確來算
         # 紀錄

@@ -84,7 +84,7 @@ class HidenMarkovModel_Viterbi():
 #        print(stateSeqIndex)
         return ro, psi, P_star_all, stateSeqIndex
     
-    def Predict_optimalStateSequence_useRoPsi(self,target, boolPrint = True):
+    def Predict_optimalStateSequence_useViterbi(self,target, boolPrint = True):
         """ """
         ro, psi, bestProb, bestStateSquenceIndex = self.CalRoPsiTable(target)
         #The best state sequence having the highest probability
@@ -110,7 +110,7 @@ if __name__ == '__main__' :
 #    test.Predict_optimalStateSequence_useRoPsi(target = "111666")
 #    test.Predict_optimalStateSequence_useRoPsi(target = "162636")
 #    test.Predict_optimalStateSequence_useRoPsi(target = "126656")
-    test.Predict_optimalStateSequence_useRoPsi(target = "1"*6+"6"*6) #6F6U #
+    test.Predict_optimalStateSequence_useViterbi(target = "1"*6+"6"*6) #6F6U #
     ro, psi = test.roTable, test.psiTable
     
     endTime = time.time()
