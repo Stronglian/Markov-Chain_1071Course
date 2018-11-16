@@ -24,8 +24,8 @@ class HMM_Dice_gamma():
         self.probabilityMatrix = probabilityMatrix.copy()
         
         # output
-        self.stateName   = stateName.copy()
-        self.stateOutput = stateOutput.copy()
+        self.stateName    = stateName.copy()
+        self.stateOutput  = stateOutput.copy()
         #
         self.stateNumber  = len(self.initialStateProb) 
         self.outputNumber = len(probabilityMatrix[0,:])
@@ -165,7 +165,7 @@ class HMM_Dice_Viterbi(HMM_Dice_gamma):
             ro[t, :]  = tmpArr.max(axis = 1)
             psi[t, :] = tmpArr.argmax(axis = 1) 
         #另外轉存
-        self.roTable = ro.copy()
+        self.roTable  = ro.copy()
         self.psiTable = psi.copy()
         # step 3 – Termination
         P_star_all = ro[-1,:].max().copy()    #P*
@@ -205,7 +205,6 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
         alpha    = self.alphaTable
         beta     = self.betaTable
         prob_PrO = self.prob_PrO
-        
         #zeta - time(t)(-1) - currectState - nextState
         zeta = np.zeros((len(target)-1, self.stateNumber, self.stateNumber), dtype = np.float64)
         # 法一 - for
@@ -218,7 +217,7 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
         return zeta
     
     def Train(self, trainData):
-        """ 利用資料急輸入 zeta 來重新訓練各參數"""
+        """ 利用訓練資料集輸入 zeta 來重新訓練各參數"""
         # 代稱，so NO copy()
         Pi = self.initialStateProb
         A  = self.stateChangeMatrix
@@ -241,21 +240,28 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
                     
         return self.initialStateProb, self.stateChangeMatrix, self.probabilityMatrix
     
-    def Test(self, testData):
-        """ """
+    def Test(self, testData, parmSet = None):
+        """ 利用測試資料集，配合已經訓練完的參數，進行預測"""
+        # 使用額外的參數
+        tmpClass = self
+        if not parmSet is None:
+            print("額外參數")
+            assert len(parmSet) == 3, "parmSet 參數內有 3: (initialStateProb, stateChangeMatrix, probabilityMatrix)"
+            initialStateProb, stateChangeMatrix, probabilityMatrix = parmSet
+            tmpClass = HMM_Dice_Viterbi(initialStateProb, stateChangeMatrix, probabilityMatrix, self.stateName, self.stateOutput)
+        # 計算正確率
         finalProb = 0.0
         for outputState, inputTarget in testData:
-            #take the coefficient after training to Viterbi
-            optimal_Prob, optimal_Seq = self.Predict_optimalStateSequence_useViterbi(inputTarget, boolPrint=False)
-            # count Accuracy
+            # take the coefficient after training to Viterbi
+            optimal_Prob, optimal_Seq = tmpClass.Predict_optimalStateSequence_useViterbi(inputTarget, boolPrint=False)
+            # Calculate the correct value for prediction
 #            tmp = (outputState - optimal_Seq)
 #            sameStateNumber = len( tmp[tmp == 0])
             sameStateNumber = np.count_nonzero((outputState - optimal_Seq)==0)
             finalProb += sameStateNumber / len(outputState)
-        print(sameStateNumber, outputState - optimal_Seq)
         finalProb /= testData.shape[0]
         return finalProb
-#%%
+#%% 預先處理用
 def ChangeFormatToUse(inputArr):
     """ (多寫的) 將共用格式 狀態(array)、輸出(array) 換成  狀態(array)、輸出(string) """
 #    print(inputArr.shape[1])
