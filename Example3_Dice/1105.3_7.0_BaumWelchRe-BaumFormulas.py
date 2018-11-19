@@ -301,21 +301,52 @@ if __name__ == '__main__' :
     stateName = ['fair', 'unfair']
 #    stateOutput = np.array([ str(i) for i in range(1, len(probabilityMatrix[0,:])+1)]) 
     stateOutput = np.array([ i for i in range(1, len(probabilityMatrix[0,:])+1)]) #這樣就可以用非字串格式了
-#%% 輸入
-    trainData = np.load("100Observation.npy")
-    testData  = np.load("100seqTest.npy")
-#    #%% 預處理- 改一行 class code 就可以免了~
-#    trainData_edit = ChangeFormatToUse(trainData)
-#    testData_edit  = ChangeFormatToUse(testData)
-#%% 開始
-    HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
-    # train
-    HMM_trainResult = HMM_B.Train(trainData)
-    # test
-    test_result = HMM_B.Test(testData)
-    # coe
-    HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
-    HMM_zeta = HMM_B.zetaTable
+##%% 輸入
+#    trainData = np.load("100Observation.npy")
+##    trainData = np.load("300SeqTrain.npy")
+##    trainData = np.load("300_300seqTraining.npy")
+#    testData  = np.load("100seqTest.npy")
+##    #%% 預處理- 改一行 class code 就可以免了~
+##    trainData_edit = ChangeFormatToUse(trainData)
+##    testData_edit  = ChangeFormatToUse(testData)
+##%% 開始
+#    HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
+#    # train
+#    HMM_trainResult = HMM_B.Train(trainData)
+#    # test
+#    test_result = HMM_B.Test(testData)
+#    # coe
+##    HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
+##    HMM_zeta = HMM_B.zetaTable
+#%% 全測試
+    print("\n\n\n\n")
+    
+    trainDataList = ["100Observation.npy", "300SeqTrain.npy", "300_300seqTraining.npy"]
+    testDataList  = ["100seqTest.npy"]
+    import prettytable
+    def TrainAllAndPrint(trainData, testData, field_names = ["pi", "A", "B"]):
+        #建模
+        HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
+        HMM_trainResult = HMM_B.Train(trainData)
+        test_result = HMM_B.Test(testData)
+        #建表
+        ta = prettytable.PrettyTable()
+#        ta.field_names = ["Accuracy", test_result]
+        ta.field_names = field_names
+        ta.add_row(HMM_trainResult)
+        # 輸出
+#        print("Accuracy:")
+        print(ta)
+    for trainDataName in trainDataList:
+        print("train dataset:", trainDataName)
+        trainData = np.load(trainDataName)
+        for testDataName in testDataList:
+            print("test dataset:", testDataName)
+            testData  = np.load(testDataName)
+            TrainAllAndPrint(trainData, testData)
+            print("\n")
 #%% 收尾
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
+    
+
