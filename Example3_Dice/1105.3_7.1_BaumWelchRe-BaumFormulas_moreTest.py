@@ -13,6 +13,7 @@ someone's slide:
     https://people.cs.umass.edu/~mccallum/courses/inlp2004a/lect10-hmm2.pdf
 """
 import numpy as np
+import prettytable
 #import warnings
 #%% from 1008.3_4.0_gamma_RecognitionProblem.py edit
 #class HidenMarkovModel_gamma():
@@ -279,7 +280,7 @@ if __name__ == '__main__' :
     import time
     startTime = time.time()
     print("START\n\n")
-##%% 基本設定 - 原本
+#%% 基本設定 - 原本
 #    #state
 #    initialStateProb   = np.array([0.6, 0.4])#[fair, unfair]
 #    # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
@@ -289,12 +290,12 @@ if __name__ == '__main__' :
 #    probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
 #                                  [1/10, 1/10, 1/10, 1/10, 1/10,  1/2]])#unfair
 #%% 基本設定 - 題目
-    # state
+#    # state
     initialStateProb  = np.array([0.5, 0.5]) #[fair, unfair]
-    # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
+#    # 0, 1, 2 #[i][j] 在state i 時，換到state j的機率
     stateChangeMatrix = np.array([[0.5, 0.5],
                                   [0.5, 0.5]]) 
-    #[i][j] 在state i 時，生成j的機率    
+#    #[i][j] 在state i 時，生成j的機率    
     probabilityMatrix = np.array([[ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6], #fair 
                                   [ 1/6,  1/6,  1/6,  1/6,  1/6,  1/6]])#unfair
     # name
@@ -303,40 +304,53 @@ if __name__ == '__main__' :
     stateOutput = np.array([ i for i in range(1, len(probabilityMatrix[0,:])+1)]) #這樣就可以用非字串格式了
 #%% 輸入
     trainData = np.load("100Observation.npy")
-#    trainData = np.load("300SeqTrain.npy")
-#    trainData = np.load("300_300seqTraining.npy")
+##    trainData = np.load("300SeqTrain.npy")
+##    trainData = np.load("300_300seqTraining.npy")
     testData  = np.load("100seqTest.npy")
-#    #%% 預處理- 改一行 class code 就可以免了~
-#    trainData_edit = ChangeFormatToUse(trainData)
-#    testData_edit  = ChangeFormatToUse(testData)
 #%% 開始
     HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
-    # train
+#    # train
     HMM_trainResult = HMM_B.Train(trainData)
-    # test
+#    # test
     test_result = HMM_B.Test(testData)
-    # coe
-#    HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
-#    HMM_zeta = HMM_B.zetaTable
-##%% 全測試
-#    print("\n\n\n\n")
-#    
-#    trainDataList = ["100Observation.npy", "300SeqTrain.npy", "300_300seqTraining.npy"]
-#    testDataList  = ["100seqTest.npy"]
-#    import prettytable
-#    def TrainAllAndPrint(trainData, testData, field_names = ["pi", "A", "B"]):
-#        #建模
-#        HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
-#        HMM_trainResult = HMM_B.Train(trainData)
-#        test_result = HMM_B.Test(testData)
-#        #建表
-#        ta = prettytable.PrettyTable()
-##        ta.field_names = ["Accuracy", test_result]
-#        ta.field_names = field_names
-#        ta.add_row(HMM_trainResult)
-#        # 輸出
-##        print("Accuracy:")
-#        print(ta)
+#    # coe
+##    HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
+##    HMM_zeta = HMM_B.zetaTable
+#%% 全測試 - 參數設置
+    trainDataList = ["100Observation.npy", "300SeqTrain.npy", "300_300seqTraining.npy"]
+    testDataList  = ["100seqTest.npy"]
+    parmSetList = [  [np.array([0.6, 0.4]), 
+                      np.array([[0.95, 0.05],  [0.1, 0.9]]), 
+                      np.array([[0.18, 0.18, 0.16, 0.16, 0.16, 0.16],[0.18, 0.18, 0.16, 0.16, 0.16, 0.16]])],
+                     [np.array([0.4, 0.6]), 
+                      np.array([[0.95, 0.05],  [0.1, 0.9]]), 
+                      np.array([[0.168, 0.168, 0.166, 0.166, 0.166, 0.166],[0.1, 0.1, 0.1, 0.1, 0.1, 0.5]])],
+                     [np.array([0.6, 0.4]), 
+                      np.array([[0.95, 0.05],  [0.1, 0.9]]), 
+                      np.array([[0.168, 0.168, 0.166, 0.166, 0.166, 0.166],[0.1, 0.1, 0.1, 0.1, 0.1, 0.5]])]                    
+            ]
+#%% 全測試 - 函數
+    print("\n\n\n")
+    
+    
+    def TrainAllAndPrint(trainData, testData, parmSet = None, field_names = ["pi", "A", "B"]):
+        if not parmSet is None:
+            assert len(parmSet) == 3, "parmSet 參數內有 3: (initialStateProb, stateChangeMatrix, probabilityMatrix)"
+            initialStateProb, stateChangeMatrix, probabilityMatrix = parmSet
+        #建模
+        HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
+        HMM_trainResult = HMM_B.Train(trainData)
+        test_result = HMM_B.Test(testData, boolPrint=False)
+        #建表
+        ta = prettytable.PrettyTable()
+        ta.field_names = field_names
+        ta.add_row(HMM_trainResult)
+        # 輸出
+        print("Accuracy is", test_result)
+        print(ta)
+#%% 全測試 - 2018/11/13 上述單一
+    TrainAllAndPrint(trainData, testData, [initialStateProb, stateChangeMatrix, probabilityMatrix])
+#%% 全測試 - 2018/11/20
 #    for trainDataName in trainDataList:
 #        print("train dataset:", trainDataName)
 #        trainData = np.load(trainDataName)
@@ -345,6 +359,15 @@ if __name__ == '__main__' :
 #            testData  = np.load(testDataName)
 #            TrainAllAndPrint(trainData, testData)
 #            print("\n")
+#%% 全測試 - 2018/11/27
+    # 指定資料
+    trainData = np.load("300_300seqTraining.npy")
+    testData  = np.load("300SeqTrain.npy")
+    # RUN
+    for i, parmSet in enumerate(parmSetList):
+        print("\n", i+1)
+        TrainAllAndPrint(trainData, testData, parmSet)
+        
 #%% 收尾
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
