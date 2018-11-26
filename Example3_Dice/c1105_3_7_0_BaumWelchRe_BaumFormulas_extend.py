@@ -314,10 +314,15 @@ if __name__ == '__main__' :
     # train
     HMM_trainResult = HMM_B.Train(trainData)
     # test
-    test_result = HMM_B.Test(testData)
+    print("testing rate:")
+    _test_result = HMM_B.Test(testData)
+    # train
+    print("training rate:")
+    _train_result = HMM_B.Test(trainData)
     # coe
 #    HMM_alpha, HMM_beta, HMM_gamma = HMM_B.alphaTable, HMM_B.betaTable, HMM_B.gammaTable
 #    HMM_zeta = HMM_B.zetaTable
+
 #%% 收尾
     endTime = time.time()
     print('\n\n\nEND,', 'It takes', endTime-startTime ,'sec.')  
