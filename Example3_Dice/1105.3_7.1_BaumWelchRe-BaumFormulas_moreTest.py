@@ -117,10 +117,10 @@ if __name__ == '__main__' :
     print("TrainData:", trainDataName, "TestData:", testDataName)
     # RUN
     for i, parmSet in enumerate(parmSetList):
-        print("\n", i+1)
-        print("Training Rate:")
+        print("\n", i+1, sep="")
+        print("Training Rate:","(use",trainDataName,")")
         TrainAllAndPrint(trainData.copy(), trainData.copy(), parmSet)
-        print("Testing Rate")
+        print("Testing Rate","(use",testDataName,")")
         TrainAllAndPrint(trainData.copy(), testData.copy(), parmSet)
         
 #%% 收尾
