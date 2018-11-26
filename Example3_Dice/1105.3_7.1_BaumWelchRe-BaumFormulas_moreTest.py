@@ -120,7 +120,7 @@ if __name__ == '__main__' :
         print("\n", i+1, sep="")
         print("Training Rate:","(use",trainDataName,")")
         TrainAllAndPrint(trainData.copy(), trainData.copy(), parmSet)
-        print("Testing Rate","(use",testDataName,")")
+        print("Testing Rate:","(use",testDataName,")")
         TrainAllAndPrint(trainData.copy(), testData.copy(), parmSet)
         
 #%% 收尾
