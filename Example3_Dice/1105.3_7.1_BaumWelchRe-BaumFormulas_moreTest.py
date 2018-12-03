@@ -16,21 +16,26 @@ import numpy as np
 import prettytable
 from c1105_3_7_0_BaumWelchRe_BaumFormulas_extend import * 
 #%%
-def TrainAllAndPrint(trainData, testData, parmSet = None, field_names = ["pi", "A", "B"]):
+def TrainAllAndPrint(trainData, testData, parmSet = None, field_names = ["pi", "A", "B"], boolTablePrint = True):
     if not parmSet is None:
         assert len(parmSet) == 3, "parmSet 參數內有 3: (initialStateProb, stateChangeMatrix, probabilityMatrix)"
         initialStateProb, stateChangeMatrix, probabilityMatrix = parmSet
     #建模
     HMM_B = HMM_Dice_BaumWelch(initialStateProb, stateChangeMatrix, probabilityMatrix, stateName, stateOutput)
     HMM_trainResult = HMM_B.Train(trainData)
-    test_result = HMM_B.Test(testData, boolPrint=False)
+    #結果
+    result_test_rate  = HMM_B.Test(testData,  boolPrint=False)
+    result_train_rate = HMM_B.Test(trainData, boolPrint=False)
     #建表
     ta = prettytable.PrettyTable()
     ta.field_names = field_names
     ta.add_row(HMM_trainResult)
     # 輸出
-    print("Accuracy is", test_result)
-    print(ta)
+    print("Testing Rate Accuracy is", result_test_rate)
+    print("Training Rate Accuracy is", result_train_rate)
+    if boolTablePrint:
+        print(ta)
+    return
 #%% 流程
 if __name__ == '__main__' :
     import time
@@ -75,20 +80,20 @@ if __name__ == '__main__' :
 ###    HMM_zeta = HMM_B.zetaTable
     
 #%% 全測試 - 2018/11/12 單一 - 參數換過了
-    trainDataName = "100Observation.npy"
-    testDataName  = "100seqTest.npy"
-    trainData = np.load(trainDataName)
-    testData  = np.load(testDataName)
-    print("TrainData:", trainDataName, "TestData:", testDataName)
-    print("Training Rate:")
-    TrainAllAndPrint(trainData, trainData, [initialStateProb, stateChangeMatrix, probabilityMatrix])
-    print("Testing Rate")
-    TrainAllAndPrint(trainData, testData,  [initialStateProb, stateChangeMatrix, probabilityMatrix])
-    print("\n\n", "="*50)
+#    trainDataName = "100Observation.npy"
+#    testDataName  = "100seqTest.npy"
+#    trainData = np.load(trainDataName)
+#    testData  = np.load(testDataName)
+#    print("TrainData:", trainDataName, "TestData:", testDataName)
+##    print("Training Rate:")
+#    TrainAllAndPrint(trainData, trainData, [initialStateProb, stateChangeMatrix, probabilityMatrix])
+##    print("Testing Rate")
+##    TrainAllAndPrint(trainData, testData,  [initialStateProb, stateChangeMatrix, probabilityMatrix])
+#    print("\n\n", "="*50)
 #%% 全測試 - 參數設置
     trainDataList = ["100Observation.npy", "300SeqTrain.npy", "300_300seqTraining.npy"]
     testDataList  = ["100seqTest.npy"]
-##%% 全測試 - 2018/11/19 - 參數可能換過
+#%% 全測試 - 2018/11/19 - 參數可能換過
 #    for trainDataName in trainDataList:
 #        print("train dataset:", trainDataName)
 #        trainData = np.load(trainDataName)
@@ -116,12 +121,12 @@ if __name__ == '__main__' :
     trainData = np.load(trainDataName)
     testData  = np.load(testDataName)
     print("TrainData:", trainDataName, "TestData:", testDataName)
+    print("Training Rate:","(use",trainDataName,")")
+    print("Testing Rate:","(use",testDataName,")")
     # RUN
     for i, parmSet in enumerate(parmSetList):
         print("\n", i+1, sep="")
-        print("Training Rate:","(use",trainDataName,")")
-        TrainAllAndPrint(trainData.copy(), trainData.copy(), parmSet)
-        print("Testing Rate:","(use",testDataName,")")
+#        TrainAllAndPrint(trainData.copy(), trainData.copy(), parmSet)
         TrainAllAndPrint(trainData.copy(), testData.copy(), parmSet)
         
 #%% 收尾
