@@ -181,7 +181,7 @@ class HMM_Dice_Viterbi(HMM_Dice_gamma):
 #        print(stateSeqIndex)
         return ro, psi, P_star_all, stateSeqIndex
     
-    def Predict_optimalStateSequence_useViterbi(self,target, boolPrint = True):
+    def Predict_optimalStateSequence_useViterbi(self, target, boolPrint = True):
         """ """
         ro, psi, bestProb, bestStateSquenceIndex = self.CalRoPsiTable(target)
         #The best state sequence having the highest probability
@@ -236,9 +236,11 @@ class HMM_Dice_BaumWelch(HMM_Dice_Viterbi):
                 for count_k in range(self.outputNumber): #計算輸出生成機率
                     B[i, count_k] = gamma[inputTarget == (count_k+1), i].sum()/gamma[:, i].sum() 
                 for j in range(self.stateNumber): #計算狀態轉換率
-                    A[i, j] = zeta[:-1, i, j].sum() /gamma[:-1, i].sum() 
+#                    A[i, j] = zeta[:-1, i, j].sum() /gamma[:-1, i].sum() # <= 壞在這~ 因為 zeta 建立的時候，本來就少一個了
+                    A[i, j] = zeta[:, i, j].sum() /gamma[:-1, i].sum() 
                     
-        return self.initialStateProb, self.stateChangeMatrix, self.probabilityMatrix
+#        return self.initialStateProb, self.stateChangeMatrix, self.probabilityMatrix
+        return Pi, A, B
     
     def Test(self, testData, parmSet = None, boolPrint = True):
         """ 利用測試資料集，配合已經訓練完的參數，進行預測"""
